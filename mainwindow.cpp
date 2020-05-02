@@ -21,6 +21,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btn_fm_st03->setEnabled(false);
     ui->btn_fm_st04->setEnabled(false);
 
+    //tune_butoons_fm
+    ui->btn_add->setEnabled(false);
+    ui->btn_rename_station->setEnabled(false);
+    ui->ln_add_station->setEnabled(false);
+
     MainWindow::fm_show_fav_btn(); //activate fm fav buttons
 
 }
@@ -28,6 +33,10 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+
+    QProcess::execute("/opt/bin/mediaclient -m DAB -g on");
+    QProcess::execute("/opt/bin/mediaclient -m RADIO -g on");
+    QProcess::execute("/opt/bin/mediaclient --shutdown");
 }
 
 //functions #######################################################################################
@@ -164,11 +173,13 @@ void MainWindow::on_btn_dab_to_tune_clicked()
 void MainWindow::on_btn_tune_to_fm_clicked()
 {
     ui->stackedWidget->setCurrentIndex(1);
+    //tuner_mode = "FM";
 }
 
 void MainWindow::on_btn_tune_to_dab_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
+    //tuner_mode = "DAB";
 }
 
 void MainWindow::on_btn_fm_to_tune_clicked()
@@ -179,6 +190,13 @@ void MainWindow::on_btn_fm_to_tune_clicked()
 void MainWindow::on_btn_fm_to_dab_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
+    //tuner_mode = "DAB";
+}
+
+void MainWindow::on_btn_dab_to_fm_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+    //tuner_mode = "FM";
 }
 
 void MainWindow::on_btn_add_favorite_clicked()
@@ -209,12 +227,13 @@ void MainWindow::on_btn_rem_favorite_clicked()
 
 void MainWindow::fm_show_fav_btn(){
 
-    //int fm_count_favs = 0;
-    QVector<int> fm_found_favs;
+    //QVector<int> fm_found_favs;
+
+    fm_found_favs.clear();
 
     for(int i = 0; i < fm_vec_vec.size(); i++){
         if(fm_vec_vec[i][2] == "fav"){
-            //++fm_count_favs;
+
             fm_found_favs.push_back(i);
         }
     }
@@ -222,46 +241,166 @@ void MainWindow::fm_show_fav_btn(){
     qDebug() << "found favs" << fm_found_favs;
     qDebug() << "found size" << fm_found_favs.size();
 
-    //for(int i = 0; i < fm_found_favs.size(); i++){
 
-        if(fm_found_favs.size() >= 1){
-            ui->btn_fm_st01->setEnabled(true);
-            ui->btn_fm_st01->setText(fm_vec_vec[fm_found_favs.at(0)][0]);
-        } else if(fm_found_favs.size() < 1){
-            ui->btn_fm_st01->setEnabled(false);
-            ui->btn_fm_st01->setText("no favorite\navailable");
+
+    if(fm_found_favs.size() >= 1){
+        ui->btn_fm_st01->setEnabled(true);
+        ui->btn_fm_st01->setText(fm_vec_vec[fm_found_favs.at(0)][0]);
+    } else if(fm_found_favs.size() < 1){
+        ui->btn_fm_st01->setEnabled(false);
+        ui->btn_fm_st01->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 2){
+        ui->btn_fm_st02->setEnabled(true);
+        ui->btn_fm_st02->setText(fm_vec_vec[fm_found_favs.at(1)][0]);
+    } else if(fm_found_favs.size() < 2){
+        ui->btn_fm_st02->setEnabled(false);
+        ui->btn_fm_st02->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 3){
+        ui->btn_fm_st03->setEnabled(true);
+        ui->btn_fm_st03->setText(fm_vec_vec[fm_found_favs.at(2)][0]);
+    } else if(fm_found_favs.size() < 3){
+        ui->btn_fm_st03->setEnabled(false);
+        ui->btn_fm_st03->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 4){
+        ui->btn_fm_st04->setEnabled(true);
+        ui->btn_fm_st04->setText(fm_vec_vec[fm_found_favs.at(3)][0]);
+    } else if(fm_found_favs.size() < 4){
+        ui->btn_fm_st04->setEnabled(false);
+        ui->btn_fm_st04->setText("no favorite\navailable");
+    }
+}
+
+void MainWindow::on_btn_add_clicked()
+{
+
+    QString add_station = ui->ln_add_station->text();
+
+    if(!add_station.isEmpty()){
+        float add_station_float = add_station.toFloat();
+        int to_mhz = add_station_float * 1000000;
+        QString station_conv_string = (QString::number(to_mhz));
+
+        if(add_station.contains(",")){
+            add_station = add_station.replace(",", ".");
+        }
+        if(!add_station.contains(".")){
+            add_station = add_station.append(".0");
         }
 
-        if(fm_found_favs.size() >= 2){
-            ui->btn_fm_st02->setEnabled(true);
-            ui->btn_fm_st02->setText(fm_vec_vec[fm_found_favs.at(1)][0]);
-        } else if(fm_found_favs.size() < 2){
-            ui->btn_fm_st02->setEnabled(false);
-            ui->btn_fm_st02->setText("no favorite\navailable");
-        }
+        QVector<QString> fm_vec;
 
-        if(fm_found_favs.size() >= 3){
-            ui->btn_fm_st03->setEnabled(true);
-            ui->btn_fm_st03->setText(fm_vec_vec[fm_found_favs.at(2)][0]);
-        } else if(fm_found_favs.size() < 3){
-            ui->btn_fm_st03->setEnabled(false);
-            ui->btn_fm_st03->setText("no favorite\navailable");
-        }
+        fm_vec.push_back("man Station@" + add_station + "MHz");
+        fm_vec.push_back(station_conv_string);
+        fm_vec.push_back(",");
 
-        if(fm_found_favs.size() >= 4){
-            ui->btn_fm_st04->setEnabled(true);
-            ui->btn_fm_st04->setText(fm_vec_vec[fm_found_favs.at(3)][0]);
-        } else if(fm_found_favs.size() < 4){
-            ui->btn_fm_st04->setEnabled(false);
-            ui->btn_fm_st04->setText("no favorite\navailable");
-        }
+        fm_vec_vec.push_back(fm_vec);
 
-    //}
+        qDebug() << " add station fm vecvec:" << fm_vec_vec;
+    }
 
+    MainWindow::fm_write_file();
+    ui->lst_fm->clear();
+    MainWindow::fm_read_file();
+    MainWindow::fm_fill_list();
+    MainWindow::fm_show_fav_btn();
 
-
+    ui->ln_add_station->setText("");
 }
 
 
 
+void MainWindow::on_btn_tuner_mode_clicked()
+{
+    if(ui->btn_tuner_mode->text() == "FM\nMODE"){
+        ui->btn_tuner_mode->setText("DAB\nMODE");
+        tuner_mode = "FM";
+        //ui->ls_dab->setVisible(false);
+        ui->lst_fm->setVisible(true);
+        //ui->btn_rename->setVisible(true);
+        //ui->ln_man_tune->setVisible(true);
+        //ui->label->setVisible(true);
+        ui->btn_add->setEnabled(true);
+        //ui->btn_man_tune->setVisible(true);
+        ui->btn_add->setEnabled(true);
+        ui->btn_rename_station->setEnabled(true);
+        ui->ln_add_station->setEnabled(true);
+    } else {
+        ui->btn_tuner_mode->setText("FM\nMODE");
+        tuner_mode = "DAB";
+        //ui->ls_dab->setVisible(true);
+        ui->lst_fm->setVisible(false);
+        //ui->btn_rename->setVisible(false);
+        //ui->ln_man_tune->setVisible(false);
+        //ui->label->setVisible(false);
+        ui->btn_add->setEnabled(false);
+        //ui->btn_man_tune->setVisible(false);
+        ui->btn_add->setEnabled(false);
+        ui->btn_rename_station->setEnabled(false);
+        ui->ln_add_station->setEnabled(false);
+    }
 
+    //enable/disable tune button depending on station selected or not
+    /*
+    int init_fm_list = ui->ls_fm->currentRow();
+    int init_dab_list = ui->ls_dab->currentRow();
+
+    if(init_fm_list == -1 && tgl_state == "FM"){
+        ui->btn_tune->setDisabled(true);
+    }
+
+    if(init_fm_list != -1 && tgl_state == "FM"){
+        ui->btn_tune->setDisabled(false);
+    }
+
+    if(init_dab_list == -1 && tgl_state == "DAB"){
+        ui->btn_tune->setDisabled(true);
+    }
+
+    if(init_dab_list != -1 && tgl_state == "DAB"){
+        ui->btn_tune->setDisabled(false);
+    }
+    */
+}
+
+void MainWindow::tune_to_station(QString freq){
+
+    if(tuner_mode == "FM"){
+
+        QString radio_dab_type = "RADIO";
+        //QString freq;
+        QString serv_id;
+
+        QProcess::execute("/opt/bin/mediaclient --start");
+        QProcess::execute("/opt/bin/mediaclient -m" + radio_dab_type + " -f" + freq);
+        if(tuner_mode == "DAB"){
+            QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -f " + freq + " --sid " + serv_id);
+        }
+        QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -g off");
+    }
+}
+
+void MainWindow::on_btn_fm_st01_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(0);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(0)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune);
+
+}
+
+void MainWindow::on_btn_fm_st02_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(1)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune);
+
+}

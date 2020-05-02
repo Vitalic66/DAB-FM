@@ -223,7 +223,7 @@
        <enum>Qt::NoFocus</enum>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="btn_rename_station">
       <property name="geometry">
        <rect>
         <x>150</x>
@@ -233,20 +233,22 @@
        </rect>
       </property>
       <property name="text">
-       <string>READ</string>
+       <string>RENAME
+STATION</string>
       </property>
      </widget>
      <widget class="QPushButton" name="btn_delete">
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>220</y>
+        <y>380</y>
         <width>90</width>
         <height>60</height>
        </rect>
       </property>
       <property name="text">
-       <string>DELETE</string>
+       <string>REMOVE
+STATION</string>
       </property>
      </widget>
      <widget class="QPushButton" name="btn_add">
@@ -259,7 +261,8 @@
        </rect>
       </property>
       <property name="text">
-       <string>ADD</string>
+       <string>ADD
+STATION</string>
       </property>
      </widget>
      <widget class="QPushButton" name="btn_tune_to_fm">
@@ -328,6 +331,62 @@ FAVORITE</string>
       <property name="text">
        <string>REMOVE
 FAVORITE</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="ln_add_station">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>220</y>
+        <width>90</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>250</y>
+        <width>67</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Mhz</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_tuner_mode">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>140</y>
+        <width>90</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>DAB
+MODE</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_scan">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>220</y>
+        <width>90</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>SCAN</string>
       </property>
      </widget>
     </widget>
