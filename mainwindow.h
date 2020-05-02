@@ -64,6 +64,14 @@ private slots:
     void on_btn_fm_st01_clicked();
     void on_btn_fm_st02_clicked();
 
+    void on_lst_fm_itemSelectionChanged();
+
+    void rename();
+
+    void on_btn_rename_station_clicked();
+
+    void on_btn_scan_clicked();
+
 private:
     Ui::MainWindow *ui;
 

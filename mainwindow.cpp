@@ -11,6 +11,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    tuner_mode = "DAB";
+
+    //start mediaclient in case it did not...
+    QProcess::execute("/opt/bin/mediaclient --start");
+    //QThread::msleep(3000);
+
     MainWindow::fm_read_file(); //read file to fm_vec_vec
     MainWindow::fm_fill_list(); //fm_vec_vec to fm_list
 
@@ -25,6 +31,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btn_add->setEnabled(false);
     ui->btn_rename_station->setEnabled(false);
     ui->ln_add_station->setEnabled(false);
+
+    ui->btn_add_favorite->setEnabled(false);
+    ui->btn_rem_favorite->setEnabled(false);
+    ui->btn_delete->setEnabled(false);
 
     MainWindow::fm_show_fav_btn(); //activate fm fav buttons
 
@@ -210,6 +220,10 @@ void MainWindow::on_btn_add_favorite_clicked()
     MainWindow::fm_read_file();
     MainWindow::fm_fill_list();
     MainWindow::fm_show_fav_btn();
+
+    ui->btn_add_favorite->setEnabled(false);
+    ui->btn_rem_favorite->setEnabled(false);
+    ui->btn_delete->setEnabled(false);
 }
 
 void MainWindow::on_btn_rem_favorite_clicked()
@@ -223,6 +237,10 @@ void MainWindow::on_btn_rem_favorite_clicked()
     MainWindow::fm_read_file();
     MainWindow::fm_fill_list();
     MainWindow::fm_show_fav_btn();
+
+    ui->btn_add_favorite->setEnabled(false);
+    ui->btn_rem_favorite->setEnabled(false);
+    ui->btn_delete->setEnabled(false);
 }
 
 void MainWindow::fm_show_fav_btn(){
@@ -310,7 +328,7 @@ void MainWindow::on_btn_add_clicked()
     MainWindow::fm_fill_list();
     MainWindow::fm_show_fav_btn();
 
-    ui->ln_add_station->setText("");
+    ui->ln_add_station->setText(""); //empty line for new entrie
 }
 
 
@@ -344,6 +362,9 @@ void MainWindow::on_btn_tuner_mode_clicked()
         ui->btn_rename_station->setEnabled(false);
         ui->ln_add_station->setEnabled(false);
     }
+
+    qDebug() << "tuner mode btn mode clicked" << tuner_mode;
+    qDebug() << "text btn tuner mode" << ui->btn_tuner_mode->text();
 
     //enable/disable tune button depending on station selected or not
     /*
@@ -403,4 +424,119 @@ void MainWindow::on_btn_fm_st02_clicked()
     //QStringList list {MainWindow::sort_list(unsort_list)};
     MainWindow::tune_to_station(fm_station_to_tune);
 
+}
+
+void MainWindow::on_lst_fm_itemSelectionChanged()
+{
+    ui->btn_add_favorite->setEnabled(true);
+    ui->btn_rem_favorite->setEnabled(true);
+    if(tuner_mode == "FM"){
+        ui->btn_delete->setEnabled(true);
+    }
+}
+
+void MainWindow::rename(){
+
+    int marked = ui->lst_fm->currentRow();
+    QString name_marked = ui->lst_fm->currentItem()->text();
+
+    bool ok;
+
+    QString new_name = QInputDialog::getText(this, "enter new name", "new name: ",QLineEdit::Normal,name_marked, &ok);
+
+    fm_vec_vec[marked].replace(0, new_name);
+
+    MainWindow::fm_write_file();
+    ui->lst_fm->clear();
+    MainWindow::fm_read_file();
+    MainWindow::fm_fill_list();
+    MainWindow::fm_show_fav_btn();
+
+    ui->btn_add_favorite->setEnabled(false);
+    ui->btn_rem_favorite->setEnabled(false);
+    ui->btn_delete->setEnabled(false);
+
+}
+
+void MainWindow::on_btn_rename_station_clicked()
+{
+    MainWindow::rename();
+}
+
+void MainWindow::on_btn_scan_clicked()
+{
+//    if(!add_station.isEmpty()){
+//        float add_station_float = add_station.toFloat();
+//        int to_mhz = add_station_float * 1000000;
+//        QString station_conv_string = (QString::number(to_mhz));
+
+//        if(add_station.contains(",")){
+//            add_station = add_station.replace(",", ".");
+//        }
+//        if(!add_station.contains(".")){
+//            add_station = add_station.append(".0");
+//        }
+
+
+    if (tuner_mode == "FM"){
+        //clear list
+        //ui->ls_fm->clear();
+        //clear vectors
+        fm_vec_vec.clear();
+        qDebug() << "content vector fm after clear:" << fm_vec_vec;
+
+        //start scanning fm ###############################################################################################################
+        QProcess process_fm;
+        process_fm.close();
+        process_fm.start("/opt/bin/mediaclient --scanfmfrequencies /dev/radio0");
+        process_fm.waitForFinished();
+        //process.close();
+        //QByteArray scanned_dab(process.readAllStandardOutput());
+        QString scanned_fm(process_fm.readAllStandardOutput());
+        process_fm.close();
+
+        QTextStream console_count_lines_fm(&scanned_fm);
+        QTextStream console_find_freq(&scanned_fm);
+        //QString line_fm;
+
+        QString line_lock = console_count_lines_fm.readLine();
+        int line_count_fm = 0;
+
+        while (!console_count_lines_fm.atEnd()) {
+            QString line_fm = console_count_lines_fm.readLine();
+            line_count_fm++;
+        }
+
+        for(int i = 0; i < line_count_fm; i++){
+            QVector<QString> fm_vec;
+            QString tmp = console_find_freq.readLine();
+            //if(tmp != "" && tmp != "Scan completed" && tmp != "SCAN SETUP"){
+            //QString match = "LOCKED";
+            if(tmp.contains("LOCKED")){
+                tmp.replace(" [LOCKED]", "000");
+                //float mhz = tmp.toFloat() / 1000000;
+                //QString mhz_str = QString::number(mhz).right();
+                //tmp = "Station " + QString::number(i-1) + " " + QString::number(mhz) + " MHz," + tmp + ",";
+
+                //out << tmp << "\n";
+
+                //unsort_scan_fm.append(tmp);
+                //qDebug() << "unsort list:" << unsort_scan_fm;
+                fm_vec.push_back("Station" + QString::number(i-1));
+                fm_vec.push_back(tmp);
+                fm_vec.push_back(",");
+
+                fm_vec_vec.push_back(fm_vec);
+            }
+        }
+
+        qDebug() << " add station fm vecvec after scan:" << fm_vec_vec;
+//    }
+
+    MainWindow::fm_write_file();
+    ui->lst_fm->clear();
+    MainWindow::fm_read_file();
+    MainWindow::fm_fill_list();
+    MainWindow::fm_show_fav_btn();
+    }
 }

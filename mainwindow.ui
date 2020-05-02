@@ -30,7 +30,7 @@
      </font>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="dab_fav_gui">
      <widget class="QLabel" name="lbl_fm_fav_2">
@@ -372,7 +372,7 @@ FAVORITE</string>
        </rect>
       </property>
       <property name="text">
-       <string>DAB
+       <string>FM
 MODE</string>
       </property>
      </widget>
