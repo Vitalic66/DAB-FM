@@ -2,6 +2,9 @@
 #include "ui_mainwindow.h"
 
 #include <QFile>
+#include <QTextStream>
+#include <QStringList>
+#include <QThread>
 
 using namespace std;
 
@@ -20,14 +23,18 @@ MainWindow::MainWindow(QWidget *parent) :
     MainWindow::fm_read_file(); //read file to fm_vec_vec
     MainWindow::fm_fill_list(); //fm_vec_vec to fm_list
 
+    MainWindow::dab_read_file(); //read file to dab_vec_vec
+    MainWindow::dab_fill_list(); //dab_vec_vec to fm_list
+
     //init gui
     //fm favs
-    ui->btn_fm_st01->setEnabled(false);
-    ui->btn_fm_st02->setEnabled(false);
-    ui->btn_fm_st03->setEnabled(false);
-    ui->btn_fm_st04->setEnabled(false);
+    //todo check why others are off???
+//    ui->btn_fm_st01->setEnabled(false);
+//    ui->btn_fm_st02->setEnabled(false);
+//    ui->btn_fm_st03->setEnabled(false);
+//    ui->btn_fm_st04->setEnabled(false);
 
-    //tune_butoons_fm
+    //tune_buttons_fm
     ui->btn_add->setEnabled(false);
     ui->btn_rename_station->setEnabled(false);
     ui->ln_add_station->setEnabled(false);
@@ -37,6 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btn_delete->setEnabled(false);
 
     MainWindow::fm_show_fav_btn(); //activate fm fav buttons
+    MainWindow::dab_show_fav_btn(); //activate dab fav buttons
+
+    qDebug() << "list fm current row" << ui->lst_fm->currentRow();
 
 }
 
@@ -86,6 +96,42 @@ void MainWindow::fm_read_file(){
     file_fm.close();
 }
 
+void MainWindow::dab_read_file(){
+
+    //read lines from fm.txt to qVectorVector
+
+    QFile file_dab(path_dab);
+    if(!file_dab.open(QFile::ReadOnly | QFile::Text)){
+        //QMessageBox::warning(this,"..","keine datei gefunden");
+        //ui->warn_no_dab_list->setVisible(true);
+        return;
+    }
+
+    dab_vec_vec.clear();
+
+    QTextStream dab_stream_in_file(&file_dab);
+    QString dab_stream_in_line;
+
+    while (!dab_stream_in_file.atEnd()) {
+
+       dab_stream_in_line = dab_stream_in_file.readLine();
+
+       QStringList split_dab_stram_in_line = dab_stream_in_line.split(",");
+
+       QVector<QString> dab_vec;
+
+       dab_vec.push_back(split_dab_stram_in_line.at(0)); //== name of station
+       dab_vec.push_back(split_dab_stram_in_line.at(1)); //== freq of station
+       dab_vec.push_back(split_dab_stram_in_line.at(2)); //== sid of station
+       dab_vec.push_back(split_dab_stram_in_line.at(3)); //== is favorit?
+       dab_vec_vec.push_back(dab_vec);
+    }
+
+    qDebug() << "dab vec vec" << dab_vec_vec;
+
+    file_dab.close();
+}
+
 void MainWindow::fm_write_file(){
 
     //writes lines from qVectorVector to file
@@ -131,6 +177,51 @@ void MainWindow::fm_write_file(){
 
 }
 
+void MainWindow::dab_write_file(){
+
+    //writes lines from qVectorVector to file
+
+    QFile file_dab(path_dab);
+    if(!file_dab.open(QFile::WriteOnly | QFile::Text)){
+        //QMessageBox::warning(this,"..","keine datei gefunden");
+        //ui->warn_no_dab_list->setVisible(true);
+        return;
+    }
+
+    file_dab.resize(0); //erase content in file before write
+
+    /*
+     *  fm_vec_vec to QstringList
+    */
+
+    QString dab_vec_vec_to_line;
+    QStringList unsort_list;
+
+    for(int i = 0; i < dab_vec_vec.size(); i++){
+        //for(int = j; j < fm_vec.size(); j++){
+            dab_vec_vec_to_line = dab_vec_vec[i][0] + "," + dab_vec_vec[i][1] + "," + dab_vec_vec[i][2] + "," + dab_vec_vec[i][3];
+            unsort_list.append(dab_vec_vec_to_line);
+        //}
+    }
+
+    QTextStream dab_write_to_file(&file_dab);
+
+    QStringList list {MainWindow::sort_list(unsort_list)};
+
+    /*
+     *  sort QStringList
+    */
+
+    foreach(QString dab_line_sort, list){
+        dab_write_to_file << dab_line_sort << "\n";
+    }
+
+
+    file_dab.flush();
+    file_dab.close();
+
+}
+
 QStringList MainWindow::sort_list(QStringList list){
 
     QCollator coll;
@@ -145,18 +236,43 @@ QStringList MainWindow::sort_list(QStringList list){
 
 void MainWindow::on_btn_delete_clicked()
 {
-    int fm_marked_line = ui->lst_fm->currentRow();
-    qDebug() << "line_remove" << fm_marked_line;
+    if(tuner_mode == "FM"){
+        int fm_marked_line = ui->lst_fm->currentRow();
+        qDebug() << "line_remove fm list" << fm_marked_line;
 
-    fm_vec_vec.remove(fm_marked_line);
+        fm_vec_vec.remove(fm_marked_line);
+        /*
+        MainWindow::fm_write_file();
+        ui->lst_fm->clear();
+        MainWindow::fm_read_file();
+        MainWindow::fm_fill_list();
+        MainWindow::fm_show_fav_btn();
 
-    MainWindow::fm_write_file();
-    ui->lst_fm->clear();
-    MainWindow::fm_read_file();
-    MainWindow::fm_fill_list();
+        MainWindow::fm_disable_btn();
+        */
+        MainWindow::fm_refresh_all();
+    }
+
+    if(tuner_mode == "DAB"){
+        int dab_marked_line = ui->lst_dab->currentRow();
+        qDebug() << "line_remove dab list" << dab_marked_line;
+
+        dab_vec_vec.remove(dab_marked_line);
+        /*
+        MainWindow::fm_write_file();
+        ui->lst_fm->clear();
+        MainWindow::fm_read_file();
+        MainWindow::fm_fill_list();
+        MainWindow::fm_show_fav_btn();
+
+        MainWindow::fm_disable_btn();
+        */
+        MainWindow::dab_refresh_all();
+    }
 }
 
-void MainWindow::fm_fill_list(){
+void MainWindow::fm_fill_list()
+{
 
     for(int i = 0; i < fm_vec_vec.size(); i++){
         QString fm_to_list;
@@ -173,6 +289,26 @@ void MainWindow::fm_fill_list(){
     }
 
     ui->lst_fm->setCurrentRow(-1);
+}
+
+void MainWindow::dab_fill_list()
+{
+
+    for(int i = 0; i < dab_vec_vec.size(); i++){
+        QString dab_to_list;
+
+        dab_to_list = dab_vec_vec[i][0];
+
+        ui->lst_dab->addItem(dab_to_list);
+
+        //mark fav green row
+        if(dab_vec_vec[i][3].contains("fav")){
+            ui->lst_dab->setCurrentRow(i);
+            ui->lst_dab->currentItem()->setBackgroundColor(Qt::green);
+        }
+    }
+
+    ui->lst_dab->setCurrentRow(-1);
 }
 
 void MainWindow::on_btn_dab_to_tune_clicked()
@@ -211,39 +347,44 @@ void MainWindow::on_btn_dab_to_fm_clicked()
 
 void MainWindow::on_btn_add_favorite_clicked()
 {
-    int marked = ui->lst_fm->currentRow();
+    if(tuner_mode == "FM"){
+        int marked = ui->lst_fm->currentRow();
 
-    fm_vec_vec[marked].insert(2, "fav");
+        fm_vec_vec[marked].insert(2, "fav");
 
-    MainWindow::fm_write_file();
-    ui->lst_fm->clear();
-    MainWindow::fm_read_file();
-    MainWindow::fm_fill_list();
-    MainWindow::fm_show_fav_btn();
+        MainWindow::fm_refresh_all();
+    }
 
-    ui->btn_add_favorite->setEnabled(false);
-    ui->btn_rem_favorite->setEnabled(false);
-    ui->btn_delete->setEnabled(false);
+    if(tuner_mode == "DAB"){
+        int marked = ui->lst_dab->currentRow();
+
+        dab_vec_vec[marked].insert(3, "fav");
+
+        MainWindow::dab_refresh_all();
+    }
 }
 
 void MainWindow::on_btn_rem_favorite_clicked()
 {
-    int marked = ui->lst_fm->currentRow();
+    if(tuner_mode == "FM"){
+        int marked = ui->lst_fm->currentRow();
 
-    fm_vec_vec[marked].insert(2, "");
+        fm_vec_vec[marked].insert(2, "");
 
-    MainWindow::fm_write_file();
-    ui->lst_fm->clear();
-    MainWindow::fm_read_file();
-    MainWindow::fm_fill_list();
-    MainWindow::fm_show_fav_btn();
+        MainWindow::fm_refresh_all();
+    }
 
-    ui->btn_add_favorite->setEnabled(false);
-    ui->btn_rem_favorite->setEnabled(false);
-    ui->btn_delete->setEnabled(false);
+    if(tuner_mode == "DAB"){
+        int marked = ui->lst_dab->currentRow();
+
+        dab_vec_vec[marked].insert(3, "");
+
+        MainWindow::dab_refresh_all();
+    }
 }
 
-void MainWindow::fm_show_fav_btn(){
+void MainWindow::fm_show_fav_btn()
+{
 
     //QVector<int> fm_found_favs;
 
@@ -292,21 +433,203 @@ void MainWindow::fm_show_fav_btn(){
         ui->btn_fm_st04->setEnabled(false);
         ui->btn_fm_st04->setText("no favorite\navailable");
     }
+
+    if(fm_found_favs.size() >= 5){
+        ui->btn_fm_st05->setEnabled(true);
+        ui->btn_fm_st05->setText(fm_vec_vec[fm_found_favs.at(4)][0]);
+    } else if(fm_found_favs.size() < 5){
+        ui->btn_fm_st05->setEnabled(false);
+        ui->btn_fm_st05->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 6){
+        ui->btn_fm_st06->setEnabled(true);
+        ui->btn_fm_st06->setText(fm_vec_vec[fm_found_favs.at(5)][0]);
+    } else if(fm_found_favs.size() < 6){
+        ui->btn_fm_st06->setEnabled(false);
+        ui->btn_fm_st06->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 7){
+        ui->btn_fm_st07->setEnabled(true);
+        ui->btn_fm_st07->setText(fm_vec_vec[fm_found_favs.at(6)][0]);
+    } else if(fm_found_favs.size() < 7){
+        ui->btn_fm_st07->setEnabled(false);
+        ui->btn_fm_st07->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 8){
+        ui->btn_fm_st08->setEnabled(true);
+        ui->btn_fm_st08->setText(fm_vec_vec[fm_found_favs.at(7)][0]);
+    } else if(fm_found_favs.size() < 8){
+        ui->btn_fm_st08->setEnabled(false);
+        ui->btn_fm_st08->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 9){
+        ui->btn_fm_st09->setEnabled(true);
+        ui->btn_fm_st09->setText(fm_vec_vec[fm_found_favs.at(8)][0]);
+    } else if(fm_found_favs.size() < 9){
+        ui->btn_fm_st09->setEnabled(false);
+        ui->btn_fm_st09->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 10){
+        ui->btn_fm_st10->setEnabled(true);
+        ui->btn_fm_st10->setText(fm_vec_vec[fm_found_favs.at(9)][0]);
+    } else if(fm_found_favs.size() < 10){
+        ui->btn_fm_st10->setEnabled(false);
+        ui->btn_fm_st10->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 11){
+        ui->btn_fm_st11->setEnabled(true);
+        ui->btn_fm_st11->setText(fm_vec_vec[fm_found_favs.at(10)][0]);
+    } else if(fm_found_favs.size() < 11){
+        ui->btn_fm_st11->setEnabled(false);
+        ui->btn_fm_st11->setText("no favorite\navailable");
+    }
+
+    if(fm_found_favs.size() >= 12){
+        ui->btn_fm_st12->setEnabled(true);
+        ui->btn_fm_st12->setText(fm_vec_vec[fm_found_favs.at(11)][0]);
+    } else if(fm_found_favs.size() < 12){
+        ui->btn_fm_st12->setEnabled(false);
+        ui->btn_fm_st12->setText("no favorite\navailable");
+    }
 }
 
-void MainWindow::on_btn_add_clicked()
+void MainWindow::dab_show_fav_btn()
+{
+
+    //QVector<int> fm_found_favs;
+
+    dab_found_favs.clear();
+
+    for(int i = 0; i < dab_vec_vec.size(); i++){
+        if(dab_vec_vec[i][3] == "fav"){
+
+            dab_found_favs.push_back(i);
+        }
+    }
+
+    qDebug() << "found favs dab" << dab_found_favs;
+    qDebug() << "found size dab" << dab_found_favs.size();
+
+
+
+    if(dab_found_favs.size() >= 1){
+        ui->btn_dab_st01->setEnabled(true);
+        ui->btn_dab_st01->setText(dab_vec_vec[dab_found_favs.at(0)][0]);
+    } else if(dab_found_favs.size() < 1){
+        ui->btn_dab_st01->setEnabled(false);
+        ui->btn_dab_st01->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 2){
+        ui->btn_dab_st02->setEnabled(true);
+        ui->btn_dab_st02->setText(dab_vec_vec[dab_found_favs.at(1)][0]);
+    } else if(dab_found_favs.size() < 2){
+        ui->btn_dab_st02->setEnabled(false);
+        ui->btn_dab_st02->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 3){
+        ui->btn_dab_st03->setEnabled(true);
+        ui->btn_dab_st03->setText(dab_vec_vec[dab_found_favs.at(2)][0]);
+    } else if(dab_found_favs.size() < 3){
+        ui->btn_dab_st03->setEnabled(false);
+        ui->btn_dab_st03->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 4){
+        ui->btn_dab_st04->setEnabled(true);
+        ui->btn_dab_st04->setText(dab_vec_vec[dab_found_favs.at(3)][0]);
+    } else if(dab_found_favs.size() < 4){
+        ui->btn_dab_st04->setEnabled(false);
+        ui->btn_dab_st04->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 5){
+        ui->btn_dab_st05->setEnabled(true);
+        ui->btn_dab_st05->setText(dab_vec_vec[dab_found_favs.at(4)][0]);
+    } else if(dab_found_favs.size() < 5){
+        ui->btn_dab_st05->setEnabled(false);
+        ui->btn_dab_st05->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 6){
+        ui->btn_dab_st06->setEnabled(true);
+        ui->btn_dab_st06->setText(dab_vec_vec[dab_found_favs.at(5)][0]);
+    } else if(dab_found_favs.size() < 6){
+        ui->btn_dab_st06->setEnabled(false);
+        ui->btn_dab_st06->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 7){
+        ui->btn_dab_st07->setEnabled(true);
+        ui->btn_dab_st07->setText(dab_vec_vec[dab_found_favs.at(6)][0]);
+    } else if(dab_found_favs.size() < 7){
+        ui->btn_dab_st07->setEnabled(false);
+        ui->btn_dab_st07->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 8){
+        ui->btn_dab_st08->setEnabled(true);
+        ui->btn_dab_st08->setText(dab_vec_vec[dab_found_favs.at(7)][0]);
+    } else if(dab_found_favs.size() < 8){
+        ui->btn_dab_st08->setEnabled(false);
+        ui->btn_dab_st08->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 9){
+        ui->btn_dab_st09->setEnabled(true);
+        ui->btn_dab_st09->setText(dab_vec_vec[dab_found_favs.at(8)][0]);
+    } else if(dab_found_favs.size() < 9){
+        ui->btn_dab_st09->setEnabled(false);
+        ui->btn_dab_st09->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 10){
+        ui->btn_dab_st10->setEnabled(true);
+        ui->btn_dab_st10->setText(dab_vec_vec[dab_found_favs.at(9)][0]);
+    } else if(dab_found_favs.size() < 10){
+        ui->btn_dab_st10->setEnabled(false);
+        ui->btn_dab_st10->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 11){
+        ui->btn_dab_st11->setEnabled(true);
+        ui->btn_dab_st11->setText(dab_vec_vec[dab_found_favs.at(10)][0]);
+    } else if(dab_found_favs.size() < 11){
+        ui->btn_dab_st11->setEnabled(false);
+        ui->btn_dab_st11->setText("no favorite\navailable");
+    }
+
+    if(dab_found_favs.size() >= 12){
+        ui->btn_dab_st12->setEnabled(true);
+        ui->btn_dab_st12->setText(dab_vec_vec[dab_found_favs.at(11)][0]);
+    } else if(dab_found_favs.size() < 12){
+        ui->btn_dab_st12->setEnabled(false);
+        ui->btn_dab_st12->setText("no favorite\navailable");
+    }
+}
+
+void MainWindow::on_btn_add_clicked() //only for fm
 {
 
     QString add_station = ui->ln_add_station->text();
 
     if(!add_station.isEmpty()){
-        float add_station_float = add_station.toFloat();
-        int to_mhz = add_station_float * 1000000;
-        QString station_conv_string = (QString::number(to_mhz));
 
         if(add_station.contains(",")){
             add_station = add_station.replace(",", ".");
         }
+
+        float add_station_float = add_station.toFloat();
+        int to_mhz = add_station_float * 1000000;
+        QString station_conv_string = (QString::number(to_mhz));
+
         if(!add_station.contains(".")){
             add_station = add_station.append(".0");
         }
@@ -315,20 +638,16 @@ void MainWindow::on_btn_add_clicked()
 
         fm_vec.push_back("man Station@" + add_station + "MHz");
         fm_vec.push_back(station_conv_string);
-        fm_vec.push_back(",");
+        fm_vec.push_back("");
 
         fm_vec_vec.push_back(fm_vec);
 
         qDebug() << " add station fm vecvec:" << fm_vec_vec;
     }
 
-    MainWindow::fm_write_file();
-    ui->lst_fm->clear();
-    MainWindow::fm_read_file();
-    MainWindow::fm_fill_list();
-    MainWindow::fm_show_fav_btn();
-
     ui->ln_add_station->setText(""); //empty line for new entrie
+
+    MainWindow::fm_refresh_all();
 }
 
 
@@ -338,7 +657,7 @@ void MainWindow::on_btn_tuner_mode_clicked()
     if(ui->btn_tuner_mode->text() == "FM\nMODE"){
         ui->btn_tuner_mode->setText("DAB\nMODE");
         tuner_mode = "FM";
-        //ui->ls_dab->setVisible(false);
+        ui->lst_dab->setVisible(false);
         ui->lst_fm->setVisible(true);
         //ui->btn_rename->setVisible(true);
         //ui->ln_man_tune->setVisible(true);
@@ -351,7 +670,7 @@ void MainWindow::on_btn_tuner_mode_clicked()
     } else {
         ui->btn_tuner_mode->setText("FM\nMODE");
         tuner_mode = "DAB";
-        //ui->ls_dab->setVisible(true);
+        ui->lst_dab->setVisible(true);
         ui->lst_fm->setVisible(false);
         //ui->btn_rename->setVisible(false);
         //ui->ln_man_tune->setVisible(false);
@@ -365,31 +684,10 @@ void MainWindow::on_btn_tuner_mode_clicked()
 
     qDebug() << "tuner mode btn mode clicked" << tuner_mode;
     qDebug() << "text btn tuner mode" << ui->btn_tuner_mode->text();
-
-    //enable/disable tune button depending on station selected or not
-    /*
-    int init_fm_list = ui->ls_fm->currentRow();
-    int init_dab_list = ui->ls_dab->currentRow();
-
-    if(init_fm_list == -1 && tgl_state == "FM"){
-        ui->btn_tune->setDisabled(true);
-    }
-
-    if(init_fm_list != -1 && tgl_state == "FM"){
-        ui->btn_tune->setDisabled(false);
-    }
-
-    if(init_dab_list == -1 && tgl_state == "DAB"){
-        ui->btn_tune->setDisabled(true);
-    }
-
-    if(init_dab_list != -1 && tgl_state == "DAB"){
-        ui->btn_tune->setDisabled(false);
-    }
-    */
 }
 
-void MainWindow::tune_to_station(QString freq){
+void MainWindow::tune_to_station(QString freq, QString sid) //todo dab
+{
 
     if(tuner_mode == "FM"){
 
@@ -404,6 +702,20 @@ void MainWindow::tune_to_station(QString freq){
         }
         QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -g off");
     }
+
+    if(tuner_mode == "DAB"){
+
+        QString radio_dab_type = "DAB";
+        //QString freq;
+        //QString serv_id;
+
+        QProcess::execute("/opt/bin/mediaclient --start");
+        QProcess::execute("/opt/bin/mediaclient -m" + radio_dab_type + " -f" + freq);
+        if(tuner_mode == "DAB"){
+            QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -f " + freq + " --sid " + sid);
+        }
+        QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -g off");
+    }
 }
 
 void MainWindow::on_btn_fm_st01_clicked()
@@ -412,7 +724,7 @@ void MainWindow::on_btn_fm_st01_clicked()
     //int fav_fm_01 = fm_found_favs.at(0);
     QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(0)][1];
     //QStringList list {MainWindow::sort_list(unsort_list)};
-    MainWindow::tune_to_station(fm_station_to_tune);
+    MainWindow::tune_to_station(fm_station_to_tune, "");
 
 }
 
@@ -422,7 +734,239 @@ void MainWindow::on_btn_fm_st02_clicked()
     //int fav_fm_01 = fm_found_favs.at(1);
     QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(1)][1];
     //QStringList list {MainWindow::sort_list(unsort_list)};
-    MainWindow::tune_to_station(fm_station_to_tune);
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st03_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(2)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st04_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(3)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st05_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(4)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st06_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(5)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st07_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(6)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st08_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(7)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st09_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(8)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st10_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(9)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st11_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(10)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_fm_st12_clicked()
+{
+    tuner_mode = "FM";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString fm_station_to_tune = fm_vec_vec[fm_found_favs.at(11)][1];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(fm_station_to_tune, "");
+
+}
+
+void MainWindow::on_btn_dab_st01_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(0);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(0)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(0)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st02_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(1)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(1)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st03_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(2)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(2)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st04_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(3)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(3)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st05_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(4)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(4)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st06_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(5)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(5)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st07_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(6)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(6)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st08_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(7)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(7)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st09_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(8)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(8)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st10_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(9)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(9)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st11_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(10)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(10)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
+
+}
+
+void MainWindow::on_btn_dab_st12_clicked()
+{
+    tuner_mode = "DAB";
+    //int fav_fm_01 = fm_found_favs.at(1);
+    QString dab_station_to_tune = dab_vec_vec[dab_found_favs.at(11)][1];
+    QString dab_sid_to_tune = dab_vec_vec[dab_found_favs.at(11)][2];
+    //QStringList list {MainWindow::sort_list(unsort_list)};
+    MainWindow::tune_to_station(dab_station_to_tune, dab_sid_to_tune);
 
 }
 
@@ -432,10 +976,22 @@ void MainWindow::on_lst_fm_itemSelectionChanged()
     ui->btn_rem_favorite->setEnabled(true);
     if(tuner_mode == "FM"){
         ui->btn_delete->setEnabled(true);
+        ui->btn_rename_station->setEnabled(true);
     }
 }
 
-void MainWindow::rename(){
+void MainWindow::on_lst_dab_itemSelectionChanged()
+{
+    ui->btn_add_favorite->setEnabled(true);
+    ui->btn_rem_favorite->setEnabled(true);
+    if(tuner_mode == "DAB"){
+        ui->btn_delete->setEnabled(true);
+        ui->btn_rename_station->setEnabled(false);
+    }
+}
+
+void MainWindow::rename() //for fm only
+{
 
     int marked = ui->lst_fm->currentRow();
     QString name_marked = ui->lst_fm->currentItem()->text();
@@ -444,18 +1000,13 @@ void MainWindow::rename(){
 
     QString new_name = QInputDialog::getText(this, "enter new name", "new name: ",QLineEdit::Normal,name_marked, &ok);
 
+    if(new_name.contains(",")){
+        new_name = new_name.replace(",", ".");
+    }
+
     fm_vec_vec[marked].replace(0, new_name);
 
-    MainWindow::fm_write_file();
-    ui->lst_fm->clear();
-    MainWindow::fm_read_file();
-    MainWindow::fm_fill_list();
-    MainWindow::fm_show_fav_btn();
-
-    ui->btn_add_favorite->setEnabled(false);
-    ui->btn_rem_favorite->setEnabled(false);
-    ui->btn_delete->setEnabled(false);
-
+    MainWindow::fm_refresh_all();
 }
 
 void MainWindow::on_btn_rename_station_clicked()
@@ -465,35 +1016,23 @@ void MainWindow::on_btn_rename_station_clicked()
 
 void MainWindow::on_btn_scan_clicked()
 {
-//    if(!add_station.isEmpty()){
-//        float add_station_float = add_station.toFloat();
-//        int to_mhz = add_station_float * 1000000;
-//        QString station_conv_string = (QString::number(to_mhz));
-
-//        if(add_station.contains(",")){
-//            add_station = add_station.replace(",", ".");
-//        }
-//        if(!add_station.contains(".")){
-//            add_station = add_station.append(".0");
-//        }
-
-
     if (tuner_mode == "FM"){
         //clear list
         //ui->ls_fm->clear();
         //clear vectors
         fm_vec_vec.clear();
-        qDebug() << "content vector fm after clear:" << fm_vec_vec;
+        //qDebug() << "content vector fm after clear:" << fm_vec_vec;
 
         //start scanning fm ###############################################################################################################
         QProcess process_fm;
         process_fm.close();
         process_fm.start("/opt/bin/mediaclient --scanfmfrequencies /dev/radio0");
         process_fm.waitForFinished();
-        //process.close();
-        //QByteArray scanned_dab(process.readAllStandardOutput());
+
         QString scanned_fm(process_fm.readAllStandardOutput());
         process_fm.close();
+
+        qDebug() << "was steht im string nach scan?" << scanned_fm;
 
         QTextStream console_count_lines_fm(&scanned_fm);
         QTextStream console_find_freq(&scanned_fm);
@@ -503,9 +1042,11 @@ void MainWindow::on_btn_scan_clicked()
         int line_count_fm = 0;
 
         while (!console_count_lines_fm.atEnd()) {
-            QString line_fm = console_count_lines_fm.readLine();
+           console_count_lines_fm.readLine();
             line_count_fm++;
         }
+
+        //qDebug() << "line count fm" << line_count_fm;
 
         for(int i = 0; i < line_count_fm; i++){
             QVector<QString> fm_vec;
@@ -531,12 +1072,192 @@ void MainWindow::on_btn_scan_clicked()
         }
 
         qDebug() << " add station fm vecvec after scan:" << fm_vec_vec;
-//    }
 
-    MainWindow::fm_write_file();
+        MainWindow::fm_refresh_all();
+        }
+
+    if (tuner_mode == "DAB"){
+
+        dab_vec_vec.clear();
+
+        //start scanning for dab frequencies ###################################################################################################
+
+        QProcess get_terminal_out;
+        get_terminal_out.close();
+        get_terminal_out.start("/opt/bin/mediaclient --scandabfrequencies /dev/dab0");
+        get_terminal_out.waitForFinished(-1); //overwrite default 30sec
+
+        QString scanned_dab(get_terminal_out.readAllStandardOutput());
+        //qDebug() << "was steht im string nach scan?" << scanned_dab;
+
+        get_terminal_out.close();
+
+        QTextStream console_count_lines_dab(&scanned_dab);
+        QTextStream console_find_freq(&scanned_dab);
+
+        QString line_lock = console_count_lines_dab.readLine();
+        int line_count_dab = 0;
+
+        while (!console_count_lines_dab.atEnd()) {
+            console_count_lines_dab.readLine();
+            line_count_dab++;
+        }
+
+        //qDebug() << "line count dab" << line_count_dab;
+
+        //search for frequencies above locked ###############################################################################
+
+        QVector<QVector<QString>> all_each_dab_lines; //hold all dab_each_lines in vector
+
+        QVector<QString> dab_freq_vec; //only frequencies in vector which ar found before "LOCKED"
+
+        for(int i = 0; i < line_count_dab; i++){
+            QVector<QString> dab_each_line; //all lines splited from console output
+            QString tmp = console_find_freq.readLine();            
+
+            dab_each_line.push_back(tmp);            
+
+            all_each_dab_lines.push_back(dab_each_line);
+
+             if(all_each_dab_lines[i][0].contains("[LOCKED]")){
+
+                QString dab_freq = all_each_dab_lines[i-1][0];
+
+                QStringRef dab_freq_cut = dab_freq.leftRef(3);
+                if(dab_freq_cut.contains(" ")){
+                    dab_freq = dab_freq.remove(0, 3);
+                } else {
+                    dab_freq = dab_freq.remove(0, 4);
+                }
+
+                dab_freq_vec.push_back(dab_freq);
+             }
+        }
+
+        //qDebug() << "all lines in vec" << all_each_dab_lines;
+        qDebug() << "only freq before locked" << dab_freq_vec;
+
+        //start scanning locked frequencies for transponders ###############################################################################
+
+
+        //QVector<QString> dab_vec;
+        QVector<QString> dab_trans_vec;
+
+        for(int i = 0; i < dab_freq_vec.size(); i++){
+
+            QProcess tune_to_locked;
+            QThread::msleep(500); //delay else found freq might not be locked
+            tune_to_locked.start("/opt/bin/mediaclient -m DAB -f " + dab_freq_vec[i]);
+            tune_to_locked.waitForReadyRead(-1);
+            tune_to_locked.waitForFinished(-1);
+            QString realy_locked(tune_to_locked.readAllStandardOutput());
+            //qDebug() << "tune_to_locked exit status" << tune_to_locked.exitStatus();
+            //qDebug() << "tune_to_locked exit code" << tune_to_locked.exitCode();
+            //qDebug() << "tune_to_locked state" << tune_to_locked.state();
+            //tune_to_locked.close();
+
+            //qDebug() << "realy locked" << realy_locked;
+
+
+            if(realy_locked.contains("LOCKED")){
+
+                //process scan transponders at frequency
+                QProcess scan_locked;
+                //scan_locked.close();
+                scan_locked.start("/opt/bin/mediaclient -m DAB --scandabservices /dev/dab0");
+                scan_locked.waitForReadyRead(-1);
+                scan_locked.waitForFinished(-1);
+
+                QString output_dab_transponder(scan_locked.readAllStandardOutput());
+
+                //QString output_dab_transponder(scan_locked.readAllStandardOutput());
+
+                QTextStream output_dab_transponder_count_lines(&output_dab_transponder);
+                QTextStream data_from_output_dab_transponder(&output_dab_transponder);
+
+                qDebug() << "transponders" << output_dab_transponder;
+
+                int line_count_dab_trans = 0;
+
+                while (!output_dab_transponder_count_lines.atEnd()) {
+                    output_dab_transponder_count_lines.readLine();
+                    line_count_dab_trans++;
+                }
+
+
+                for(int j = 0; j < line_count_dab_trans; j++){
+                    QVector<QString> dab_vec;
+
+                    QString tmp_trans = data_from_output_dab_transponder.readLine();
+                    ////dab_trans_vec.push_back(tmp_trans);
+                    if(!tmp_trans.contains("Service Name") && !tmp_trans.contains("failed")){
+
+                        //"0 x char char char char"
+                        QRegularExpression sid_re("[0][x][a-f0-9][a-f0-9][a-f0-9][a-f0-9]");
+                        QRegularExpressionMatch match = sid_re.match(tmp_trans);
+                        QString matched;
+                        if (match.hasMatch()) {
+                            matched = match.captured(0);
+                        }
+
+                        QString service_name = tmp_trans.left(tmp_trans.indexOf(QLatin1String("0x")));
+
+                        dab_vec.push_back(service_name); //name of station
+                        dab_vec.push_back(dab_freq_vec[i]); //frequency of station
+                        dab_vec.push_back(matched); //service id of station
+                        dab_vec.push_back(""); //fav placeholder
+                        dab_vec_vec.push_back(dab_vec);
+                    }
+                }
+                ////qDebug() << "lines count transponder" << line_count_dab_trans;
+            } else {
+                dab_trans_vec.push_back("lock failed at " + dab_freq_vec[i] + " hit scan again...");
+            }
+
+        }
+
+        qDebug() << "dab trans vec" << dab_trans_vec;
+        qDebug() << "#################################################################################################";
+        qDebug() << "after trans finished" << dab_vec_vec;
+
+    MainWindow::dab_refresh_all();
+    }
+}
+
+void MainWindow::fm_disable_btn()
+{
+    ui->lst_fm->setCurrentRow(-1);
+    ui->btn_add_favorite->setEnabled(false);
+    ui->btn_rem_favorite->setEnabled(false);
+    ui->btn_delete->setEnabled(false);
+    ui->btn_rename_station->setEnabled(false);
+}
+
+void MainWindow::dab_disable_btn()
+{
+    ui->lst_dab->setCurrentRow(-1);
+    ui->btn_add_favorite->setEnabled(false);
+    ui->btn_rem_favorite->setEnabled(false);
+    ui->btn_delete->setEnabled(false);
+    ui->btn_rename_station->setEnabled(false);
+}
+
+void MainWindow::fm_refresh_all()
+{
+    MainWindow::fm_write_file(); //write vecvec to file
     ui->lst_fm->clear();
     MainWindow::fm_read_file();
-    MainWindow::fm_fill_list();
+    MainWindow::fm_fill_list(); //write file to vecvec
     MainWindow::fm_show_fav_btn();
-    }
+    MainWindow::fm_disable_btn();
+}
+
+void MainWindow::dab_refresh_all()
+{
+    MainWindow::dab_write_file(); //write vecvec to file
+    ui->lst_dab->clear();
+    MainWindow::dab_read_file();
+    MainWindow::dab_fill_list(); //write file to vecvec
+    MainWindow::dab_show_fav_btn();
+    MainWindow::dab_disable_btn();
 }

@@ -29,13 +29,16 @@ public:
 private slots:
 
     void fm_read_file();
+    void dab_read_file();
     void fm_write_file();
+    void dab_write_file();
 
     QStringList sort_list(QStringList list);
 
-    void on_btn_delete_clicked();
+    void on_btn_delete_clicked(); //only for fm
 
     void fm_fill_list();
+    void dab_fill_list();
 
     void on_btn_dab_to_tune_clicked();
 
@@ -48,29 +51,60 @@ private slots:
     void on_btn_rem_favorite_clicked();
 
     void fm_show_fav_btn();
+    void dab_show_fav_btn();
 
     void on_btn_fm_to_tune_clicked();
 
     void on_btn_fm_to_dab_clicked();
 
-    void on_btn_add_clicked();
+    void on_btn_add_clicked(); //only for fm
 
     void on_btn_dab_to_fm_clicked();
 
     void on_btn_tuner_mode_clicked();
 
-    void tune_to_station(QString freq);
+    void tune_to_station(QString freq, QString sid);
 
     void on_btn_fm_st01_clicked();
     void on_btn_fm_st02_clicked();
+    void on_btn_fm_st03_clicked();
+    void on_btn_fm_st04_clicked();
+    void on_btn_fm_st05_clicked();
+    void on_btn_fm_st06_clicked();
+    void on_btn_fm_st07_clicked();
+    void on_btn_fm_st08_clicked();
+    void on_btn_fm_st09_clicked();
+    void on_btn_fm_st10_clicked();
+    void on_btn_fm_st11_clicked();
+    void on_btn_fm_st12_clicked();
+
+    void on_btn_dab_st01_clicked();
+    void on_btn_dab_st02_clicked();
+    void on_btn_dab_st03_clicked();
+    void on_btn_dab_st04_clicked();
+    void on_btn_dab_st05_clicked();
+    void on_btn_dab_st06_clicked();
+    void on_btn_dab_st07_clicked();
+    void on_btn_dab_st08_clicked();
+    void on_btn_dab_st09_clicked();
+    void on_btn_dab_st10_clicked();
+    void on_btn_dab_st11_clicked();
+    void on_btn_dab_st12_clicked();
 
     void on_lst_fm_itemSelectionChanged();
+    void on_lst_dab_itemSelectionChanged();
 
     void rename();
 
     void on_btn_rename_station_clicked();
 
     void on_btn_scan_clicked();
+
+    void fm_disable_btn();
+    void dab_disable_btn();
+
+    void fm_refresh_all();
+    void dab_refresh_all();
 
 private:
     Ui::MainWindow *ui;
@@ -79,6 +113,7 @@ private:
     QVector<QVector<QString>> fm_vec_vec;
 
     QVector<int> fm_found_favs;
+    QVector<int> dab_found_favs;
 
     QString path_dab = "../.dab.txt";
     QString path_fm = "../.fm.txt";
