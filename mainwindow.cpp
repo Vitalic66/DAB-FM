@@ -18,21 +18,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //start mediaclient in case it did not...
     QProcess::execute("/opt/bin/mediaclient --start");
-    //QThread::msleep(3000);
+    QThread::msleep(1500);
 
     MainWindow::fm_read_file(); //read file to fm_vec_vec
     MainWindow::fm_fill_list(); //fm_vec_vec to fm_list
 
     MainWindow::dab_read_file(); //read file to dab_vec_vec
     MainWindow::dab_fill_list(); //dab_vec_vec to fm_list
-
-    //init gui
-    //fm favs
-    //todo check why others are off???
-//    ui->btn_fm_st01->setEnabled(false);
-//    ui->btn_fm_st02->setEnabled(false);
-//    ui->btn_fm_st03->setEnabled(false);
-//    ui->btn_fm_st04->setEnabled(false);
 
     //tune_buttons_fm
     ui->btn_add->setEnabled(false);
@@ -46,7 +38,21 @@ MainWindow::MainWindow(QWidget *parent) :
     MainWindow::fm_show_fav_btn(); //activate fm fav buttons
     MainWindow::dab_show_fav_btn(); //activate dab fav buttons
 
-    qDebug() << "list fm current row" << ui->lst_fm->currentRow();
+    if(tuner_mode == "DAB"){
+        ui->lst_dab->setVisible(true);
+        ui->lst_fm->setVisible(false);
+        QProcess::execute("/opt/bin/mediaclient -m DAB -g off");
+        QProcess::execute("/opt/bin/mediaclient -d /dev/dab0");
+    }
+
+    if(tuner_mode == "FM"){
+        ui->lst_dab->setVisible(false);
+        ui->lst_fm->setVisible(true);
+        QProcess::execute("/opt/bin/mediaclient -m RADIO -g off");
+        QProcess::execute("/opt/bin/mediaclient -d /dev/radio0");
+    }
+
+    //qDebug() << "list fm current row" << ui->lst_fm->currentRow();
 
 }
 
@@ -91,7 +97,7 @@ void MainWindow::fm_read_file(){
        fm_vec_vec.push_back(fm_vec);
     }
 
-    qDebug() << "fm vec vec" << fm_vec_vec;
+    //qDebug() << "fm vec vec" << fm_vec_vec;
 
     file_fm.close();
 }
@@ -127,7 +133,7 @@ void MainWindow::dab_read_file(){
        dab_vec_vec.push_back(dab_vec);
     }
 
-    qDebug() << "dab vec vec" << dab_vec_vec;
+    //qDebug() << "dab vec vec" << dab_vec_vec;
 
     file_dab.close();
 }
@@ -238,35 +244,19 @@ void MainWindow::on_btn_delete_clicked()
 {
     if(tuner_mode == "FM"){
         int fm_marked_line = ui->lst_fm->currentRow();
-        qDebug() << "line_remove fm list" << fm_marked_line;
+        //qDebug() << "line_remove fm list" << fm_marked_line;
 
         fm_vec_vec.remove(fm_marked_line);
-        /*
-        MainWindow::fm_write_file();
-        ui->lst_fm->clear();
-        MainWindow::fm_read_file();
-        MainWindow::fm_fill_list();
-        MainWindow::fm_show_fav_btn();
 
-        MainWindow::fm_disable_btn();
-        */
         MainWindow::fm_refresh_all();
     }
 
     if(tuner_mode == "DAB"){
         int dab_marked_line = ui->lst_dab->currentRow();
-        qDebug() << "line_remove dab list" << dab_marked_line;
+        //qDebug() << "line_remove dab list" << dab_marked_line;
 
         dab_vec_vec.remove(dab_marked_line);
-        /*
-        MainWindow::fm_write_file();
-        ui->lst_fm->clear();
-        MainWindow::fm_read_file();
-        MainWindow::fm_fill_list();
-        MainWindow::fm_show_fav_btn();
 
-        MainWindow::fm_disable_btn();
-        */
         MainWindow::dab_refresh_all();
     }
 }
@@ -397,8 +387,8 @@ void MainWindow::fm_show_fav_btn()
         }
     }
 
-    qDebug() << "found favs" << fm_found_favs;
-    qDebug() << "found size" << fm_found_favs.size();
+    //qDebug() << "found favs" << fm_found_favs;
+    //qDebug() << "found size" << fm_found_favs.size();
 
 
 
@@ -513,8 +503,8 @@ void MainWindow::dab_show_fav_btn()
         }
     }
 
-    qDebug() << "found favs dab" << dab_found_favs;
-    qDebug() << "found size dab" << dab_found_favs.size();
+    //qDebug() << "found favs dab" << dab_found_favs;
+    //qDebug() << "found size dab" << dab_found_favs.size();
 
 
 
@@ -642,7 +632,7 @@ void MainWindow::on_btn_add_clicked() //only for fm
 
         fm_vec_vec.push_back(fm_vec);
 
-        qDebug() << " add station fm vecvec:" << fm_vec_vec;
+        //qDebug() << " add station fm vecvec:" << fm_vec_vec;
     }
 
     ui->ln_add_station->setText(""); //empty line for new entrie
@@ -667,6 +657,7 @@ void MainWindow::on_btn_tuner_mode_clicked()
         ui->btn_add->setEnabled(true);
         ui->btn_rename_station->setEnabled(true);
         ui->ln_add_station->setEnabled(true);
+        ui->lst_fm->setCurrentRow(-1);
     } else {
         ui->btn_tuner_mode->setText("FM\nMODE");
         tuner_mode = "DAB";
@@ -680,10 +671,11 @@ void MainWindow::on_btn_tuner_mode_clicked()
         ui->btn_add->setEnabled(false);
         ui->btn_rename_station->setEnabled(false);
         ui->ln_add_station->setEnabled(false);
+        ui->lst_dab->setCurrentRow(-1);
     }
 
-    qDebug() << "tuner mode btn mode clicked" << tuner_mode;
-    qDebug() << "text btn tuner mode" << ui->btn_tuner_mode->text();
+    //qDebug() << "tuner mode btn mode clicked" << tuner_mode;
+    //qDebug() << "text btn tuner mode" << ui->btn_tuner_mode->text();
 }
 
 void MainWindow::tune_to_station(QString freq, QString sid) //todo dab
@@ -1017,9 +1009,7 @@ void MainWindow::on_btn_rename_station_clicked()
 void MainWindow::on_btn_scan_clicked()
 {
     if (tuner_mode == "FM"){
-        //clear list
-        //ui->ls_fm->clear();
-        //clear vectors
+
         fm_vec_vec.clear();
         //qDebug() << "content vector fm after clear:" << fm_vec_vec;
 
@@ -1032,7 +1022,7 @@ void MainWindow::on_btn_scan_clicked()
         QString scanned_fm(process_fm.readAllStandardOutput());
         process_fm.close();
 
-        qDebug() << "was steht im string nach scan?" << scanned_fm;
+        //qDebug() << "was steht im string nach scan?" << scanned_fm;
 
         QTextStream console_count_lines_fm(&scanned_fm);
         QTextStream console_find_freq(&scanned_fm);
@@ -1071,7 +1061,7 @@ void MainWindow::on_btn_scan_clicked()
             }
         }
 
-        qDebug() << " add station fm vecvec after scan:" << fm_vec_vec;
+        //qDebug() << " add station fm vecvec after scan:" << fm_vec_vec;
 
         MainWindow::fm_refresh_all();
         }
@@ -1175,7 +1165,7 @@ void MainWindow::on_btn_scan_clicked()
                 QTextStream output_dab_transponder_count_lines(&output_dab_transponder);
                 QTextStream data_from_output_dab_transponder(&output_dab_transponder);
 
-                qDebug() << "transponders" << output_dab_transponder;
+                //qDebug() << "transponders" << output_dab_transponder;
 
                 int line_count_dab_trans = 0;
 
@@ -1216,9 +1206,9 @@ void MainWindow::on_btn_scan_clicked()
 
         }
 
-        qDebug() << "dab trans vec" << dab_trans_vec;
-        qDebug() << "#################################################################################################";
-        qDebug() << "after trans finished" << dab_vec_vec;
+//        qDebug() << "dab trans vec" << dab_trans_vec;
+//        qDebug() << "#################################################################################################";
+//        qDebug() << "after trans finished" << dab_vec_vec;
 
     MainWindow::dab_refresh_all();
     }
