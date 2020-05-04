@@ -106,6 +106,16 @@ private slots:
     void fm_refresh_all();
     void dab_refresh_all();
 
+    void on_btn_tune_clicked();
+
+    void on_btn_tune_to_mute_clicked();
+
+    void on_btn_dab_to_mute_clicked();
+
+    void on_btn_fm_to_mute_clicked();
+
+    void mute_unmute();
+
 private:
     Ui::MainWindow *ui;
 
@@ -117,9 +127,10 @@ private:
 
     QString path_dab = "../.dab.txt";
     QString path_fm = "../.fm.txt";
+    QString path_settings = "../dab_fm.ini";
 
     QString tuner_mode;
-
+    QString mute_unmute_state;
 };
 
 #endif // MAINWINDOW_H

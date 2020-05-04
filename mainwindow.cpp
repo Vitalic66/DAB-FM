@@ -8,6 +8,21 @@
 
 using namespace std;
 
+/*todo list
+ * settings menu
+ * pics for db stations
+ * data from dab stations
+ * rds fm
+ * bugfixes
+ *  - when switching from DAB favorites to SCAN list and DAB mode was selected before, wrong list is shown.
+ * clear code
+ * tune button at scan list             ### done
+ * stylesheets
+ * dab names (remove \t)                ### done
+ * shorten station name to fit button
+ * mute button                          ### done
+*/
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -15,10 +30,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     tuner_mode = "DAB";
+    mute_unmute_state = "unmuted";
 
     //start mediaclient in case it did not...
+    //QProcess::execute("/opt/bin/mediaclient --shutdown");
+//    QThread::msleep(2000);
     QProcess::execute("/opt/bin/mediaclient --start");
-    QThread::msleep(1500);
+    QThread::msleep(4000);
 
     MainWindow::fm_read_file(); //read file to fm_vec_vec
     MainWindow::fm_fill_list(); //fm_vec_vec to fm_list
@@ -34,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btn_add_favorite->setEnabled(false);
     ui->btn_rem_favorite->setEnabled(false);
     ui->btn_delete->setEnabled(false);
+    ui->btn_tune->setEnabled(false);
 
     MainWindow::fm_show_fav_btn(); //activate fm fav buttons
     MainWindow::dab_show_fav_btn(); //activate dab fav buttons
@@ -41,15 +60,15 @@ MainWindow::MainWindow(QWidget *parent) :
     if(tuner_mode == "DAB"){
         ui->lst_dab->setVisible(true);
         ui->lst_fm->setVisible(false);
-        QProcess::execute("/opt/bin/mediaclient -m DAB -g off");
-        QProcess::execute("/opt/bin/mediaclient -d /dev/dab0");
+        //QProcess::execute("/opt/bin/mediaclient -m DAB -g off");
+        //QProcess::execute("/opt/bin/mediaclient -d /dev/dab0");
     }
 
     if(tuner_mode == "FM"){
         ui->lst_dab->setVisible(false);
         ui->lst_fm->setVisible(true);
-        QProcess::execute("/opt/bin/mediaclient -m RADIO -g off");
-        QProcess::execute("/opt/bin/mediaclient -d /dev/radio0");
+        //QProcess::execute("/opt/bin/mediaclient -m RADIO -g off");
+        //QProcess::execute("/opt/bin/mediaclient -d /dev/radio0");
     }
 
     //qDebug() << "list fm current row" << ui->lst_fm->currentRow();
@@ -658,6 +677,8 @@ void MainWindow::on_btn_tuner_mode_clicked()
         ui->btn_rename_station->setEnabled(true);
         ui->ln_add_station->setEnabled(true);
         ui->lst_fm->setCurrentRow(-1);
+
+        MainWindow::fm_refresh_all();
     } else {
         ui->btn_tuner_mode->setText("FM\nMODE");
         tuner_mode = "DAB";
@@ -672,25 +693,27 @@ void MainWindow::on_btn_tuner_mode_clicked()
         ui->btn_rename_station->setEnabled(false);
         ui->ln_add_station->setEnabled(false);
         ui->lst_dab->setCurrentRow(-1);
+
+        MainWindow::dab_refresh_all();
     }
 
     //qDebug() << "tuner mode btn mode clicked" << tuner_mode;
     //qDebug() << "text btn tuner mode" << ui->btn_tuner_mode->text();
 }
 
-void MainWindow::tune_to_station(QString freq, QString sid) //todo dab
+void MainWindow::tune_to_station(QString freq, QString sid)
 {
-
+/*
     if(tuner_mode == "FM"){
 
         QString radio_dab_type = "RADIO";
         //QString freq;
-        QString serv_id;
+        //QString serv_id;
 
         QProcess::execute("/opt/bin/mediaclient --start");
         QProcess::execute("/opt/bin/mediaclient -m" + radio_dab_type + " -f" + freq);
         if(tuner_mode == "DAB"){
-            QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -f " + freq + " --sid " + serv_id);
+            QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -f " + freq + " --sid " + sid);
         }
         QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -g off");
     }
@@ -708,6 +731,29 @@ void MainWindow::tune_to_station(QString freq, QString sid) //todo dab
         }
         QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -g off");
     }
+*/
+    QProcess::execute("/opt/bin/mediaclient --start");
+
+    QString radio_dab_type;
+
+    if(tuner_mode == "FM"){
+        radio_dab_type = "RADIO";
+        QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -f" + freq);
+    }
+    if(tuner_mode == "DAB"){
+        radio_dab_type = "DAB";
+        QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -f " + freq);
+        QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -f " + freq + " --sid " + sid);
+
+//        QProcess dab_tune;
+//        dab_tune.start("/opt/bin/mediaclient -m " + radio_dab_type + " -f " + freq + " --sid " + sid);
+//        dab_tune.waitForReadyRead(-1);
+    }
+
+    //QThread::msleep(1000);
+    QProcess::execute("/opt/bin/mediaclient -m " + radio_dab_type + " -g off");
+
+    mute_unmute_state = "unmuted";
 }
 
 void MainWindow::on_btn_fm_st01_clicked()
@@ -969,6 +1015,7 @@ void MainWindow::on_lst_fm_itemSelectionChanged()
     if(tuner_mode == "FM"){
         ui->btn_delete->setEnabled(true);
         ui->btn_rename_station->setEnabled(true);
+        ui->btn_tune->setEnabled(true);
     }
 }
 
@@ -979,6 +1026,7 @@ void MainWindow::on_lst_dab_itemSelectionChanged()
     if(tuner_mode == "DAB"){
         ui->btn_delete->setEnabled(true);
         ui->btn_rename_station->setEnabled(false);
+        ui->btn_tune->setEnabled(true);
     }
 }
 
@@ -1041,22 +1089,12 @@ void MainWindow::on_btn_scan_clicked()
         for(int i = 0; i < line_count_fm; i++){
             QVector<QString> fm_vec;
             QString tmp = console_find_freq.readLine();
-            //if(tmp != "" && tmp != "Scan completed" && tmp != "SCAN SETUP"){
-            //QString match = "LOCKED";
+
             if(tmp.contains("LOCKED")){
-                tmp.replace(" [LOCKED]", "000");
-                //float mhz = tmp.toFloat() / 1000000;
-                //QString mhz_str = QString::number(mhz).right();
-                //tmp = "Station " + QString::number(i-1) + " " + QString::number(mhz) + " MHz," + tmp + ",";
-
-                //out << tmp << "\n";
-
-                //unsort_scan_fm.append(tmp);
-                //qDebug() << "unsort list:" << unsort_scan_fm;
+                tmp.replace(" [LOCKED]", "000");              
                 fm_vec.push_back("Station" + QString::number(i-1));
                 fm_vec.push_back(tmp);
                 fm_vec.push_back(",");
-
                 fm_vec_vec.push_back(fm_vec);
             }
         }
@@ -1192,6 +1230,8 @@ void MainWindow::on_btn_scan_clicked()
 
                         QString service_name = tmp_trans.left(tmp_trans.indexOf(QLatin1String("0x")));
 
+                        service_name = service_name.trimmed(); //remove trailing whitespaces
+
                         dab_vec.push_back(service_name); //name of station
                         dab_vec.push_back(dab_freq_vec[i]); //frequency of station
                         dab_vec.push_back(matched); //service id of station
@@ -1203,33 +1243,29 @@ void MainWindow::on_btn_scan_clicked()
             } else {
                 dab_trans_vec.push_back("lock failed at " + dab_freq_vec[i] + " hit scan again...");
             }
-
         }
-
-//        qDebug() << "dab trans vec" << dab_trans_vec;
-//        qDebug() << "#################################################################################################";
-//        qDebug() << "after trans finished" << dab_vec_vec;
-
     MainWindow::dab_refresh_all();
     }
 }
 
-void MainWindow::fm_disable_btn()
+void MainWindow::fm_disable_btn() //disable some buttons on lciking some other button
 {
     ui->lst_fm->setCurrentRow(-1);
     ui->btn_add_favorite->setEnabled(false);
     ui->btn_rem_favorite->setEnabled(false);
     ui->btn_delete->setEnabled(false);
     ui->btn_rename_station->setEnabled(false);
+    ui->btn_tune->setEnabled(false);
 }
 
-void MainWindow::dab_disable_btn()
+void MainWindow::dab_disable_btn() //disable some buttons on lciking some other button
 {
     ui->lst_dab->setCurrentRow(-1);
     ui->btn_add_favorite->setEnabled(false);
     ui->btn_rem_favorite->setEnabled(false);
     ui->btn_delete->setEnabled(false);
     ui->btn_rename_station->setEnabled(false);
+    ui->btn_tune->setEnabled(false);
 }
 
 void MainWindow::fm_refresh_all()
@@ -1250,4 +1286,74 @@ void MainWindow::dab_refresh_all()
     MainWindow::dab_fill_list(); //write file to vecvec
     MainWindow::dab_show_fav_btn();
     MainWindow::dab_disable_btn();
+}
+
+void MainWindow::on_btn_tune_clicked()
+{
+    QString freq;
+    QString sid;
+
+    if(tuner_mode == "FM"){
+        int marked = ui->lst_fm->currentRow();
+        freq = fm_vec_vec[marked][1];
+        sid = "";
+    }
+
+    if(tuner_mode == "DAB"){
+        int marked = ui->lst_dab->currentRow();
+        freq = dab_vec_vec[marked][1];
+        sid = dab_vec_vec[marked][2];
+    }
+
+    MainWindow::tune_to_station(freq, sid);
+}
+
+void MainWindow::on_btn_dab_to_mute_clicked()
+{
+    MainWindow::mute_unmute();
+}
+
+void MainWindow::on_btn_fm_to_mute_clicked()
+{
+    MainWindow::mute_unmute();
+}
+
+void MainWindow::on_btn_tune_to_mute_clicked()
+{
+    MainWindow::mute_unmute();
+}
+
+void MainWindow::mute_unmute()
+{
+    QString tmp_mute_unmute_state;
+
+    if(mute_unmute_state == "unmuted"){
+        //turn mute on
+
+        if(tuner_mode == "FM"){
+            QProcess::execute("/opt/bin/mediaclient -m RADIO -g on");
+        }
+
+        if(tuner_mode == "DAB"){
+            QProcess::execute("/opt/bin/mediaclient -m DAB -g on");
+        }
+
+        tmp_mute_unmute_state = "muted";
+    }
+
+    if(mute_unmute_state == "muted"){
+        //turn mute off
+
+        if(tuner_mode == "FM"){
+            QProcess::execute("/opt/bin/mediaclient -m RADIO -g off");
+        }
+
+        if(tuner_mode == "DAB"){
+            QProcess::execute("/opt/bin/mediaclient -m DAB -g off");
+        }
+
+        tmp_mute_unmute_state = "unmuted";
+    }
+
+    mute_unmute_state = tmp_mute_unmute_state;
 }

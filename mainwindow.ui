@@ -269,6 +269,20 @@ FAVORITES</string>
        <string>SETTINGS</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="btn_dab_to_mute">
+      <property name="geometry">
+       <rect>
+        <x>550</x>
+        <y>20</y>
+        <width>100</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>MUTE
+UNMUTE</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="fm_fav_gui">
      <widget class="QLabel" name="lbl_fm_fav">
@@ -505,6 +519,20 @@ STATIONS</string>
       </property>
       <property name="text">
        <string>SETTINGS</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_fm_to_mute">
+      <property name="geometry">
+       <rect>
+        <x>550</x>
+        <y>20</y>
+        <width>100</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>MUTE
+UNMUTE</string>
       </property>
      </widget>
     </widget>
@@ -747,6 +775,33 @@ MODE</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_tune">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>300</y>
+        <width>90</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TUNE</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_tune_to_mute">
+      <property name="geometry">
+       <rect>
+        <x>550</x>
+        <y>20</y>
+        <width>100</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>MUTE
+UNMUTE</string>
       </property>
      </widget>
     </widget>
