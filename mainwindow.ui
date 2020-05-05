@@ -30,7 +30,7 @@
      </font>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="dab_fav_gui">
      <widget class="QLabel" name="lbl_fm_fav_2">
@@ -96,10 +96,10 @@ FAVORITES</string>
      <widget class="QPushButton" name="btn_dab_st03">
       <property name="geometry">
        <rect>
-        <x>427</x>
+        <x>420</x>
         <y>110</y>
-        <width>150</width>
-        <height>80</height>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -109,10 +109,10 @@ FAVORITES</string>
      <widget class="QPushButton" name="btn_dab_st06">
       <property name="geometry">
        <rect>
-        <x>223</x>
-        <y>220</y>
-        <width>150</width>
-        <height>80</height>
+        <x>220</x>
+        <y>230</y>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -122,10 +122,10 @@ FAVORITES</string>
      <widget class="QPushButton" name="btn_dab_st04">
       <property name="geometry">
        <rect>
-        <x>630</x>
+        <x>620</x>
         <y>110</y>
-        <width>150</width>
-        <height>80</height>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -137,21 +137,33 @@ FAVORITES</string>
        <rect>
         <x>20</x>
         <y>110</y>
-        <width>150</width>
-        <height>80</height>
+        <width>160</width>
+        <height>90</height>
        </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
       <property name="text">
        <string>PushButton</string>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>16</width>
+        <height>16</height>
+       </size>
       </property>
      </widget>
      <widget class="QPushButton" name="btn_dab_st02">
       <property name="geometry">
        <rect>
-        <x>223</x>
+        <x>220</x>
         <y>110</y>
-        <width>150</width>
-        <height>80</height>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -162,9 +174,9 @@ FAVORITES</string>
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>220</y>
-        <width>150</width>
-        <height>80</height>
+        <y>230</y>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -174,10 +186,10 @@ FAVORITES</string>
      <widget class="QPushButton" name="btn_dab_st07">
       <property name="geometry">
        <rect>
-        <x>427</x>
-        <y>220</y>
-        <width>150</width>
-        <height>80</height>
+        <x>420</x>
+        <y>230</y>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -188,9 +200,9 @@ FAVORITES</string>
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>330</y>
-        <width>150</width>
-        <height>80</height>
+        <y>350</y>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -200,10 +212,10 @@ FAVORITES</string>
      <widget class="QPushButton" name="btn_dab_st10">
       <property name="geometry">
        <rect>
-        <x>223</x>
-        <y>330</y>
-        <width>150</width>
-        <height>80</height>
+        <x>220</x>
+        <y>350</y>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -213,10 +225,10 @@ FAVORITES</string>
      <widget class="QPushButton" name="btn_dab_st11">
       <property name="geometry">
        <rect>
-        <x>427</x>
-        <y>330</y>
-        <width>150</width>
-        <height>80</height>
+        <x>420</x>
+        <y>350</y>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -226,10 +238,10 @@ FAVORITES</string>
      <widget class="QPushButton" name="btn_dab_st12">
       <property name="geometry">
        <rect>
-        <x>630</x>
-        <y>330</y>
-        <width>150</width>
-        <height>80</height>
+        <x>620</x>
+        <y>350</y>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">
@@ -239,10 +251,10 @@ FAVORITES</string>
      <widget class="QPushButton" name="btn_dab_st08">
       <property name="geometry">
        <rect>
-        <x>630</x>
-        <y>220</y>
-        <width>150</width>
-        <height>80</height>
+        <x>620</x>
+        <y>230</y>
+        <width>160</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="text">

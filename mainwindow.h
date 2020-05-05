@@ -26,19 +26,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+private slots:    
 
-    void fm_read_file();
-    void dab_read_file();
-    void fm_write_file();
-    void dab_write_file();
-
-    QStringList sort_list(QStringList list);
-
-    void on_btn_delete_clicked(); //only for fm
-
-    void fm_fill_list();
-    void dab_fill_list();
+    void on_btn_delete_clicked(); //only for fm    
 
     void on_btn_dab_to_tune_clicked();
 
@@ -48,10 +38,7 @@ private slots:
 
     void on_btn_add_favorite_clicked();
 
-    void on_btn_rem_favorite_clicked();
-
-    void fm_show_fav_btn();
-    void dab_show_fav_btn();
+    void on_btn_rem_favorite_clicked();    
 
     void on_btn_fm_to_tune_clicked();
 
@@ -61,9 +48,7 @@ private slots:
 
     void on_btn_dab_to_fm_clicked();
 
-    void on_btn_tuner_mode_clicked();
-
-    void tune_to_station(QString freq, QString sid);
+    void on_btn_tuner_mode_clicked();    
 
     void on_btn_fm_st01_clicked();
     void on_btn_fm_st02_clicked();
@@ -94,7 +79,18 @@ private slots:
     void on_lst_fm_itemSelectionChanged();
     void on_lst_dab_itemSelectionChanged();
 
-    void rename();
+    void on_btn_tune_clicked();
+
+    void on_btn_tune_to_mute_clicked();
+
+    void on_btn_dab_to_mute_clicked();
+
+    void on_btn_fm_to_mute_clicked();
+
+    void fm_show_fav_btn();
+    void dab_show_fav_btn();
+
+    void tune_to_station(QString freq, QString sid);
 
     void on_btn_rename_station_clicked();
 
@@ -106,15 +102,22 @@ private slots:
     void fm_refresh_all();
     void dab_refresh_all();
 
-    void on_btn_tune_clicked();
+    void rename();
 
-    void on_btn_tune_to_mute_clicked();
+    void fm_read_file();
+    void dab_read_file();
+    void fm_write_file();
+    void dab_write_file();
 
-    void on_btn_dab_to_mute_clicked();
+    QStringList sort_list(QStringList list);
 
-    void on_btn_fm_to_mute_clicked();
+    void fm_fill_list();
+    void dab_fill_list();
 
     void mute_unmute();
+
+    QString logo_dab_fav(QString sid);
+    bool dab_logo_exists(QString sid);
 
 private:
     Ui::MainWindow *ui;
@@ -128,6 +131,8 @@ private:
     QString path_dab = "../.dab.txt";
     QString path_fm = "../.fm.txt";
     QString path_settings = "../dab_fm.ini";
+
+    QString path_dab_icons = "../senderlogos/";
 
     QString tuner_mode;
     QString mute_unmute_state;
