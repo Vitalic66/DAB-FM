@@ -116,8 +116,12 @@ private slots:
 
     void mute_unmute();
 
-    QString logo_dab_fav(QString sid);
+    //QString logo_dab_fav(QString sid);
     bool dab_logo_exists(QString sid);
+
+    //QObject paintEvent(QPaintEvent *e, QString path_dab_logo);
+
+    QPixmap logo_dab(QString in);
 
 private:
     Ui::MainWindow *ui;
@@ -136,6 +140,14 @@ private:
 
     QString tuner_mode;
     QString mute_unmute_state;
+
+    QString dark_theme = "";
+    QString default_theme = "";
+
+    //stylesheets
+    QString btn_default_rounded = ("border: 1px solid #ababab;border-radius: 20px;background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #ffffff, stop:1 #efefef);");
+
+
 };
 
 #endif // MAINWINDOW_H

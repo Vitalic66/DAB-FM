@@ -147,13 +147,16 @@ FAVORITES</string>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
       <property name="text">
        <string>PushButton</string>
       </property>
       <property name="iconSize">
        <size>
         <width>16</width>
-        <height>16</height>
+        <height>12</height>
        </size>
       </property>
      </widget>
@@ -165,6 +168,11 @@ FAVORITES</string>
         <width>160</width>
         <height>90</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border: 1px solid #ababab;
+border-radius: 20px;
+background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #ffffff, stop:1 #efefef);</string>
       </property>
       <property name="text">
        <string>PushButton</string>

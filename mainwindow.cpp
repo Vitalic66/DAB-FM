@@ -6,6 +6,9 @@
 #include <QStringList>
 #include <QThread>
 #include <QFileInfo>
+#include <QPainter>
+#include <QBitmap>
+#include <QPixmap>
 
 using namespace std;
 
@@ -16,12 +19,14 @@ using namespace std;
  * rds fm
  * bugfixes
  *  - when switching from DAB favorites to SCAN list and DAB mode was selected before, wrong list is shown.
+ *  - sometimes no sound on dab after start
  * clear code
  * tune button at scan list             ### done
  * stylesheets
  * dab names (remove \t)                ### done
- * shorten station name to fit button
+ * shorten station name to fit button   ### done for dab (logos)
  * mute button                          ### done
+ * restart mediaclient button
 */
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -34,10 +39,10 @@ MainWindow::MainWindow(QWidget *parent) :
     mute_unmute_state = "unmuted";
 
     //start mediaclient in case it did not...
-    //QProcess::execute("/opt/bin/mediaclient --shutdown");
-//    QThread::msleep(2000);
+    QProcess::execute("/opt/bin/mediaclient --shutdown");
+    QThread::msleep(200);
     QProcess::execute("/opt/bin/mediaclient --start");
-    QThread::msleep(4000);
+    QThread::msleep(300);
 
     MainWindow::fm_read_file(); //read file to fm_vec_vec
     MainWindow::fm_fill_list(); //fm_vec_vec to fm_list
@@ -523,6 +528,8 @@ void MainWindow::dab_show_fav_btn()
         }
     }
 
+
+
     //qDebug() << "found favs dab" << dab_found_favs;
     //qDebug() << "found size dab" << dab_found_favs.size();
 
@@ -534,16 +541,20 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st01->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            //pixmap = pixmap.scaled(120, 90, Qt::IgnoreAspectRatio);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st01->setIcon(ButtonIcon);
-            ui->btn_dab_st01->setIconSize(pixmap.rect().size());
+            //ui->btn_dab_st01->setIconSize(scaled_dab_station_logo.rect().size());
+            ui->btn_dab_st01->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st01->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st01->setIcon(QIcon());
             ui->btn_dab_st01->setText(dab_vec_vec[dab_found_favs.at(0)][0]);
+            ui->btn_dab_st01->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 1){
         ui->btn_dab_st01->setIcon(QIcon());
+        ui->btn_dab_st01->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st01->setEnabled(false);
         ui->btn_dab_st01->setText("no favorite\navailable");
     }
@@ -555,16 +566,20 @@ void MainWindow::dab_show_fav_btn()
 
         if(dab_logo_exist == true){
             ui->btn_dab_st02->setText("");
-            QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
-            ui->btn_dab_st02->setIcon(ButtonIcon);
-            ui->btn_dab_st02->setIconSize(pixmap.rect().size());
+            QString dab_logo = path_dab_icons + btn_sid + ".png";            
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
+            ui->btn_dab_st02->setIcon(ButtonIcon);            
+            ui->btn_dab_st02->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st02->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st02->setIcon(QIcon());
             ui->btn_dab_st02->setText(dab_vec_vec[dab_found_favs.at(1)][0]);
+            ui->btn_dab_st02->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 2){
         ui->btn_dab_st02->setIcon(QIcon());
+        ui->btn_dab_st02->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st02->setEnabled(false);
         ui->btn_dab_st02->setText("no favorite\navailable");
     }
@@ -577,15 +592,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st03->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st03->setIcon(ButtonIcon);
-            ui->btn_dab_st03->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st03->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st03->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st03->setIcon(QIcon());
             ui->btn_dab_st03->setText(dab_vec_vec[dab_found_favs.at(2)][0]);
+            ui->btn_dab_st03->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 3){
         ui->btn_dab_st03->setIcon(QIcon());
+        ui->btn_dab_st03->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st03->setEnabled(false);
         ui->btn_dab_st03->setText("no favorite\navailable");
     }
@@ -598,15 +617,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st04->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st04->setIcon(ButtonIcon);
-            ui->btn_dab_st04->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st04->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st04->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st04->setIcon(QIcon());
             ui->btn_dab_st04->setText(dab_vec_vec[dab_found_favs.at(3)][0]);
+            ui->btn_dab_st04->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 4){
         ui->btn_dab_st04->setIcon(QIcon());
+        ui->btn_dab_st04->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st04->setEnabled(false);
         ui->btn_dab_st04->setText("no favorite\navailable");
     }
@@ -619,15 +642,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st05->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st05->setIcon(ButtonIcon);
-            ui->btn_dab_st05->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st05->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st05->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st05->setIcon(QIcon());
             ui->btn_dab_st05->setText(dab_vec_vec[dab_found_favs.at(4)][0]);
+            ui->btn_dab_st05->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 5){
         ui->btn_dab_st05->setIcon(QIcon());
+        ui->btn_dab_st05->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st05->setEnabled(false);
         ui->btn_dab_st05->setText("no favorite\navailable");
     }
@@ -640,15 +667,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st06->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st06->setIcon(ButtonIcon);
-            ui->btn_dab_st06->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st06->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st06->setStyleSheet("border: 0px");
         } else {
-            ui->btn_dab_st03->setText(dab_vec_vec[dab_found_favs.at(5)][0]);
+            ui->btn_dab_st06->setIcon(QIcon());
+            ui->btn_dab_st06->setText(dab_vec_vec[dab_found_favs.at(5)][0]);
+            ui->btn_dab_st06->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 6){
         ui->btn_dab_st06->setIcon(QIcon());
+        ui->btn_dab_st06->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st06->setEnabled(false);
         ui->btn_dab_st06->setText("no favorite\navailable");
     }
@@ -661,15 +692,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st07->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st07->setIcon(ButtonIcon);
-            ui->btn_dab_st07->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st07->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st07->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st07->setIcon(QIcon());
             ui->btn_dab_st07->setText(dab_vec_vec[dab_found_favs.at(6)][0]);
+            ui->btn_dab_st07->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 7){
         ui->btn_dab_st07->setIcon(QIcon());
+        ui->btn_dab_st07->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st07->setEnabled(false);
         ui->btn_dab_st07->setText("no favorite\navailable");
     }
@@ -682,15 +717,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st08->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st08->setIcon(ButtonIcon);
-            ui->btn_dab_st08->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st08->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st08->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st08->setIcon(QIcon());
             ui->btn_dab_st08->setText(dab_vec_vec[dab_found_favs.at(7)][0]);
+            ui->btn_dab_st08->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 8){
         ui->btn_dab_st08->setIcon(QIcon());
+        ui->btn_dab_st08->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st08->setEnabled(false);
         ui->btn_dab_st08->setText("no favorite\navailable");
     }
@@ -703,15 +742,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st09->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st09->setIcon(ButtonIcon);
-            ui->btn_dab_st09->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st09->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st09->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st09->setIcon(QIcon());
             ui->btn_dab_st09->setText(dab_vec_vec[dab_found_favs.at(8)][0]);
+            ui->btn_dab_st09->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 9){
         ui->btn_dab_st09->setIcon(QIcon());
+        ui->btn_dab_st09->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st09->setEnabled(false);
         ui->btn_dab_st09->setText("no favorite\navailable");
     }
@@ -724,15 +767,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st10->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st10->setIcon(ButtonIcon);
-            ui->btn_dab_st10->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st10->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st10->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st10->setIcon(QIcon());
             ui->btn_dab_st10->setText(dab_vec_vec[dab_found_favs.at(9)][0]);
+            ui->btn_dab_st10->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 10){
         ui->btn_dab_st10->setIcon(QIcon());
+        ui->btn_dab_st10->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st10->setEnabled(false);
         ui->btn_dab_st10->setText("no favorite\navailable");
     }
@@ -745,15 +792,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st11->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st11->setIcon(ButtonIcon);
-            ui->btn_dab_st11->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st11->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st11->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st11->setIcon(QIcon());
             ui->btn_dab_st11->setText(dab_vec_vec[dab_found_favs.at(10)][0]);
+            ui->btn_dab_st11->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 11){
         ui->btn_dab_st11->setIcon(QIcon());
+        ui->btn_dab_st11->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st11->setEnabled(false);
         ui->btn_dab_st11->setText("no favorite\navailable");
     }
@@ -766,15 +817,19 @@ void MainWindow::dab_show_fav_btn()
         if(dab_logo_exist == true){
             ui->btn_dab_st12->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap pixmap(dab_logo);
-            QIcon ButtonIcon(pixmap);
+            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            QIcon ButtonIcon(back_from_scale);
             ui->btn_dab_st12->setIcon(ButtonIcon);
-            ui->btn_dab_st12->setIconSize(pixmap.rect().size());
+            ui->btn_dab_st12->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st12->setStyleSheet("border: 0px");
         } else {
+            ui->btn_dab_st12->setIcon(QIcon());
             ui->btn_dab_st12->setText(dab_vec_vec[dab_found_favs.at(11)][0]);
+            ui->btn_dab_st12->setStyleSheet(btn_default_rounded);
         }
     } else if(dab_found_favs.size() < 12){
         ui->btn_dab_st12->setIcon(QIcon());
+        ui->btn_dab_st12->setStyleSheet(btn_default_rounded);
         ui->btn_dab_st12->setEnabled(false);
         ui->btn_dab_st12->setText("no favorite\navailable");
     }
@@ -1525,13 +1580,6 @@ void MainWindow::mute_unmute()
     mute_unmute_state = tmp_mute_unmute_state;
 }
 
-QString MainWindow::logo_dab_fav(QString sid) //returns dab station logo if exists
-{
-    QString dab_logo = path_dab_icons + sid +".png";
-
-    return dab_logo;
-}
-
 bool MainWindow::dab_logo_exists(QString sid) {
 
     QString dab_logo = path_dab_icons + sid +".png";
@@ -1543,4 +1591,25 @@ bool MainWindow::dab_logo_exists(QString sid) {
     } else {
         return false;
     }
+}
+
+QPixmap MainWindow::logo_dab(QString in)
+{
+
+    QPixmap dab_station_logo(in);
+    QPixmap scaled_dab_station_logo = dab_station_logo.scaled(160, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    QBitmap map(160, 120);
+    map.fill(Qt::color0);
+
+    QPainter painter(&map);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setBrush(Qt::color1);
+    //painter.drawRoundedRect(3, 18, 153, 83, 11, 11);
+    painter.drawRoundedRect(0, 15, 160, 90, 20, 20);
+
+
+    scaled_dab_station_logo.setMask(map);
+
+    return scaled_dab_station_logo;
 }
