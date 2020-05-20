@@ -14,6 +14,8 @@
 #include <QListWidgetItem>
 #include <QCollator>
 
+#include <tune.h>
+
 namespace Ui {
 class MainWindow;
 }
@@ -117,14 +119,16 @@ private slots:
     void mute_unmute();
 
     //QString logo_dab_fav(QString sid);
-    bool dab_logo_exists(QString sid);
+    //bool dab_logo_exists(QString sid);
 
     //QObject paintEvent(QPaintEvent *e, QString path_dab_logo);
 
-    QPixmap logo_dab(QString in);
+    //QPixmap logo_dab(QString in);
 
 private:
     Ui::MainWindow *ui;
+
+    Tune tune;
 
     QVector<QVector<QString>> dab_vec_vec;
     QVector<QVector<QString>> fm_vec_vec;

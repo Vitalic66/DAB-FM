@@ -6,9 +6,9 @@
 #include <QStringList>
 #include <QThread>
 #include <QFileInfo>
-#include <QPainter>
-#include <QBitmap>
-#include <QPixmap>
+//#include <QPainter>
+//#include <QBitmap>
+//#include <QPixmap>
 
 using namespace std;
 
@@ -536,6 +536,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 1){
         ui->btn_dab_st01->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(0)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -552,6 +553,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st01->setText(dab_vec_vec[dab_found_favs.at(0)][0]);
             ui->btn_dab_st01->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st01->setText(dab_vec_vec[dab_found_favs.at(0)][0]);
     } else if(dab_found_favs.size() < 1){
         ui->btn_dab_st01->setIcon(QIcon());
         ui->btn_dab_st01->setStyleSheet(btn_default_rounded);
@@ -562,6 +565,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 2){
         ui->btn_dab_st02->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(1)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -577,6 +581,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st02->setText(dab_vec_vec[dab_found_favs.at(1)][0]);
             ui->btn_dab_st02->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st02->setText(dab_vec_vec[dab_found_favs.at(1)][0]);
     } else if(dab_found_favs.size() < 2){
         ui->btn_dab_st02->setIcon(QIcon());
         ui->btn_dab_st02->setStyleSheet(btn_default_rounded);
@@ -587,6 +593,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 3){
         ui->btn_dab_st03->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(2)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -602,6 +609,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st03->setText(dab_vec_vec[dab_found_favs.at(2)][0]);
             ui->btn_dab_st03->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st03->setText(dab_vec_vec[dab_found_favs.at(2)][0]);
     } else if(dab_found_favs.size() < 3){
         ui->btn_dab_st03->setIcon(QIcon());
         ui->btn_dab_st03->setStyleSheet(btn_default_rounded);
@@ -612,6 +621,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 4){
         ui->btn_dab_st04->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(3)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -627,6 +637,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st04->setText(dab_vec_vec[dab_found_favs.at(3)][0]);
             ui->btn_dab_st04->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st04->setText(dab_vec_vec[dab_found_favs.at(3)][0]);
     } else if(dab_found_favs.size() < 4){
         ui->btn_dab_st04->setIcon(QIcon());
         ui->btn_dab_st04->setStyleSheet(btn_default_rounded);
@@ -637,6 +649,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 5){
         ui->btn_dab_st05->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(4)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -652,6 +665,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st05->setText(dab_vec_vec[dab_found_favs.at(4)][0]);
             ui->btn_dab_st05->setStyleSheet(btn_default_rounded);
         }
+        */
+         ui->btn_dab_st05->setText(dab_vec_vec[dab_found_favs.at(4)][0]);
     } else if(dab_found_favs.size() < 5){
         ui->btn_dab_st05->setIcon(QIcon());
         ui->btn_dab_st05->setStyleSheet(btn_default_rounded);
@@ -662,6 +677,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 6){
         ui->btn_dab_st06->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(5)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -677,6 +693,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st06->setText(dab_vec_vec[dab_found_favs.at(5)][0]);
             ui->btn_dab_st06->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st06->setText(dab_vec_vec[dab_found_favs.at(5)][0]);
     } else if(dab_found_favs.size() < 6){
         ui->btn_dab_st06->setIcon(QIcon());
         ui->btn_dab_st06->setStyleSheet(btn_default_rounded);
@@ -687,6 +705,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 7){
         ui->btn_dab_st07->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(6)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -702,6 +721,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st07->setText(dab_vec_vec[dab_found_favs.at(6)][0]);
             ui->btn_dab_st07->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st07->setText(dab_vec_vec[dab_found_favs.at(6)][0]);
     } else if(dab_found_favs.size() < 7){
         ui->btn_dab_st07->setIcon(QIcon());
         ui->btn_dab_st07->setStyleSheet(btn_default_rounded);
@@ -712,6 +733,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 8){
         ui->btn_dab_st08->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(7)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -727,6 +749,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st08->setText(dab_vec_vec[dab_found_favs.at(7)][0]);
             ui->btn_dab_st08->setStyleSheet(btn_default_rounded);
         }
+        */
+         ui->btn_dab_st08->setText(dab_vec_vec[dab_found_favs.at(7)][0]);
     } else if(dab_found_favs.size() < 8){
         ui->btn_dab_st08->setIcon(QIcon());
         ui->btn_dab_st08->setStyleSheet(btn_default_rounded);
@@ -737,6 +761,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 9){
         ui->btn_dab_st09->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(8)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -752,6 +777,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st09->setText(dab_vec_vec[dab_found_favs.at(8)][0]);
             ui->btn_dab_st09->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st09->setText(dab_vec_vec[dab_found_favs.at(8)][0]);
     } else if(dab_found_favs.size() < 9){
         ui->btn_dab_st09->setIcon(QIcon());
         ui->btn_dab_st09->setStyleSheet(btn_default_rounded);
@@ -762,6 +789,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 10){
         ui->btn_dab_st10->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(9)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -777,6 +805,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st10->setText(dab_vec_vec[dab_found_favs.at(9)][0]);
             ui->btn_dab_st10->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st10->setText(dab_vec_vec[dab_found_favs.at(9)][0]);
     } else if(dab_found_favs.size() < 10){
         ui->btn_dab_st10->setIcon(QIcon());
         ui->btn_dab_st10->setStyleSheet(btn_default_rounded);
@@ -787,6 +817,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 11){
         ui->btn_dab_st11->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(10)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -802,6 +833,8 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st11->setText(dab_vec_vec[dab_found_favs.at(10)][0]);
             ui->btn_dab_st11->setStyleSheet(btn_default_rounded);
         }
+        */
+        ui->btn_dab_st11->setText(dab_vec_vec[dab_found_favs.at(10)][0]);
     } else if(dab_found_favs.size() < 11){
         ui->btn_dab_st11->setIcon(QIcon());
         ui->btn_dab_st11->setStyleSheet(btn_default_rounded);
@@ -812,6 +845,7 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 12){
         ui->btn_dab_st12->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(11)][2];
+        /*
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
@@ -827,6 +861,10 @@ void MainWindow::dab_show_fav_btn()
             ui->btn_dab_st12->setText(dab_vec_vec[dab_found_favs.at(11)][0]);
             ui->btn_dab_st12->setStyleSheet(btn_default_rounded);
         }
+        */
+
+        ui->btn_dab_st12->setText(dab_vec_vec[dab_found_favs.at(11)][0]);
+
     } else if(dab_found_favs.size() < 12){
         ui->btn_dab_st12->setIcon(QIcon());
         ui->btn_dab_st12->setStyleSheet(btn_default_rounded);
@@ -1579,7 +1617,7 @@ void MainWindow::mute_unmute()
 
     mute_unmute_state = tmp_mute_unmute_state;
 }
-
+/*
 bool MainWindow::dab_logo_exists(QString sid) {
 
     QString dab_logo = path_dab_icons + sid +".png";
@@ -1592,7 +1630,8 @@ bool MainWindow::dab_logo_exists(QString sid) {
         return false;
     }
 }
-
+*/
+/*
 QPixmap MainWindow::logo_dab(QString in)
 {
 
@@ -1613,3 +1652,4 @@ QPixmap MainWindow::logo_dab(QString in)
 
     return scaled_dab_station_logo;
 }
+*/
