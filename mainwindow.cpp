@@ -536,25 +536,27 @@ void MainWindow::dab_show_fav_btn()
     if(dab_found_favs.size() >= 1){
         ui->btn_dab_st01->setEnabled(true);
         QString btn_sid = dab_vec_vec[dab_found_favs.at(0)][2];
-        /*
+
         bool dab_logo_exist {MainWindow::dab_logo_exists(btn_sid)};
 
         if(dab_logo_exist == true){
             ui->btn_dab_st01->setText("");
             QString dab_logo = path_dab_icons + btn_sid + ".png";
-            QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
-            QIcon ButtonIcon(back_from_scale);
+            //QPixmap back_from_scale {MainWindow::logo_dab(dab_logo)};
+            //QIcon ButtonIcon(back_from_scale);
+            QIcon ButtonIcon(dab_logo);
+
             ui->btn_dab_st01->setIcon(ButtonIcon);
             //ui->btn_dab_st01->setIconSize(scaled_dab_station_logo.rect().size());
-            ui->btn_dab_st01->setIconSize(back_from_scale.rect().size());
+            ui->btn_dab_st01->setIconSize(QSize(160,120));
             ui->btn_dab_st01->setStyleSheet("border: 0px");
         } else {
             ui->btn_dab_st01->setIcon(QIcon());
             ui->btn_dab_st01->setText(dab_vec_vec[dab_found_favs.at(0)][0]);
             ui->btn_dab_st01->setStyleSheet(btn_default_rounded);
         }
-        */
-        ui->btn_dab_st01->setText(dab_vec_vec[dab_found_favs.at(0)][0]);
+
+        //ui->btn_dab_st01->setText(dab_vec_vec[dab_found_favs.at(0)][0]);
     } else if(dab_found_favs.size() < 1){
         ui->btn_dab_st01->setIcon(QIcon());
         ui->btn_dab_st01->setStyleSheet(btn_default_rounded);
@@ -1617,7 +1619,7 @@ void MainWindow::mute_unmute()
 
     mute_unmute_state = tmp_mute_unmute_state;
 }
-/*
+
 bool MainWindow::dab_logo_exists(QString sid) {
 
     QString dab_logo = path_dab_icons + sid +".png";
@@ -1630,7 +1632,7 @@ bool MainWindow::dab_logo_exists(QString sid) {
         return false;
     }
 }
-*/
+
 /*
 QPixmap MainWindow::logo_dab(QString in)
 {

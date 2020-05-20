@@ -119,7 +119,7 @@ private slots:
     void mute_unmute();
 
     //QString logo_dab_fav(QString sid);
-    //bool dab_logo_exists(QString sid);
+    bool dab_logo_exists(QString sid);
 
     //QObject paintEvent(QPaintEvent *e, QString path_dab_logo);
 
