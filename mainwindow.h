@@ -14,7 +14,7 @@
 #include <QListWidgetItem>
 #include <QCollator>
 
-#include <tune.h>
+//#include <tune.h>
 
 namespace Ui {
 class MainWindow;
@@ -128,7 +128,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    Tune tune;
+    //Tune tune;
 
     QVector<QVector<QString>> dab_vec_vec;
     QVector<QVector<QString>> fm_vec_vec;
